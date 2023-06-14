@@ -7,6 +7,12 @@ Author: Who wrote it
 Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-Imports: Rcpp (>= 1.0.10), RcppEigen
+Imports: 
+    doParallel,
+    doSNOW,
+    foreach,
+    Rcpp (>= 1.0.10),
+    RcppEigen,
+    rstanarm
 LinkingTo: Rcpp, RcppEigen
 RoxygenNote: 7.2.3

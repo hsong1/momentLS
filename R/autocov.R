@@ -12,18 +12,3 @@ autocov <-
     return(adj)
   }
 
-
-correlogram_from_x <-
-  function(x,center=TRUE){
-    M=length(x)
-    r=autocov(x,center=center)
-    r_full=c(r,r[M:2])
-    return(Re(fft(r_full))) #the imaginary components are all 0
-  }
-
-autocov_from_correlogram <-
-  function(correlogram){
-    M_full=length(correlogram)
-    M=(M_full+1)/2
-    return((Re(fft(correlogram))/M_full)[1:M]) #imaginary components all 0
-  }
