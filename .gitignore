@@ -1,7 +1,14 @@
+# R files #
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+.Rbuildignore
+
+# Compiled source #
 src/*.o
 src/*.so
 src/*.dll
+
+# OS generated files #
+.DS_Store
