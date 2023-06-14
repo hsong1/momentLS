@@ -4,12 +4,13 @@
 #'@import parallel
 #'@import foreach
 #'@import rstanarm
-
+#'@useDynLib momentLS
+#'
 #'@export
 generateChain = function(chainParams){
   #chainParams = list(type="AR",  M = 10000, rho = rho)
   #chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
-  #chainParams = list(type="GLM", M = 10000, X=X, y=y, warmup=1000)
+  #chainParams = list(type="GLM", M = 10000, X=X, y=y, link = "probit", warmup=1000)
   M = chainParams$M
   if(chainParams$type=="AR"){
     rho = chainParams$rho
@@ -64,7 +65,7 @@ approxAsympVar = function(chainParams,nIters, parallel=FALSE,nclust=parallel::de
   }
   
   sim_all = 
-    foreach(i=1:nIters,.options.snow=opts,.packages = c("rstanarm","regularizedSR"))%dopar%{
+    foreach(i=1:nIters,.options.snow=opts,.packages = c("rstanarm","momentLS"))%dopar%{
     sim_i = generateChain(chainParams)$x
     if(is.null(dim(sim_i))){sim_i = matrix(sim_i,ncol=1)}
     sim_i
