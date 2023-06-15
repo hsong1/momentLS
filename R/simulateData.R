@@ -50,19 +50,20 @@ generateChain = function(chainParams){
 
 #'@export
 approxAsympVar = function(chainParams,nIters, parallel=FALSE,nclust=parallel::detectCores()-2){
+  # approximate asymp.variance(s) based on nIters parallel chains (baed on chainParams)
   
+  if(nIters < 3) stop("nIters at least needs to be 3")
   if(parallel){
     cl=snow::makeSOCKcluster(nclust)
-    
-    pb <- txtProgressBar(max = nIters, style = 3)
-    progress <- function(n) setTxtProgressBar(pb, n)
-    opts <- list(progress = progress)
     registerDoSNOW(cl)
     snow::clusterExport(cl,list=c("chainParams"))
     
   }else{
     foreach::registerDoSEQ()
   }
+  pb <- txtProgressBar(max = nIters, style = 3)
+  progress <- function(n) setTxtProgressBar(pb, n)
+  opts <- list(progress = progress)
   
   sim_all = 
     foreach(i=1:nIters,.options.snow=opts,.packages = c("rstanarm","momentLS"))%dopar%{
