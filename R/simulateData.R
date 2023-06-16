@@ -103,7 +103,7 @@ generateAR1Chain = function(M,rho){
 }
 
 #'@export
-generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), autoscale=TRUE, chains=1, M = 1000, warmup=1000){
+generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), autoscale=TRUE, chains=1, M = 1000, warmup=1000,...){
   
   type = match.arg(type, c("glm","glmer"))
   if(type=="glm"){
@@ -116,7 +116,8 @@ generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family 
                  prior_aux = exponential(autoscale= autoscale),
                  chains=chains, # the number of markov chains
                  iter=M+warmup, # the number of iterations for each chain (including warmup)
-                 warmup=warmup  # the number of warmup (aka burnin) iterations
+                 warmup=warmup,  # the number of warmup (aka burnin) iterations
+                 ...
     ) 
   }else if(type=="glmer"){
     fit=stan_glmer(formula = formula,
@@ -129,7 +130,8 @@ generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family 
                    prior_covariance = decov(),
                    chains=chains, # the number of markov chains
                    iter=M+warmup, # the number of iterations for each chain (including warmup)
-                   warmup=warmup  # the number of warmup (aka burnin) iterations
+                   warmup=warmup,  # the number of warmup (aka burnin) iterations
+                   ...
     ) 
   }
   
