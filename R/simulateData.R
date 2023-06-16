@@ -10,40 +10,47 @@
 generateChain = function(chainParams){
   #chainParams = list(type="AR",  M = 10000, rho = rho)
   #chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
-  #chainParams = list(type="GLM", M = 10000, X=X, y=y, link = "probit", warmup=1000)
+  #chainparams = list(type="glmer", M = 10000, formula = y ~ roach1 + treatment+(1|senior),data = roaches, type = 'glmer',offset = with(roaches,log(exposure2)),family = rstanarm::neg_binomial_2(),autoscale = TRUE,warmup=1000)
+  
   M = chainParams$M
   if(chainParams$type=="AR"){
     rho = chainParams$rho
     x = generateAR1Chain(M = M, rho = rho)
-    
-    
     F_weights=x$F_weights; F_support = x$F_support
     varTruth = sum(F_weights*(1+F_support)/(1-F_support))
-    g_coefs= NULL
-    
+    opt=list()
     x = x$x
   }else if(chainParams$type =="MH"){
     x= generateMHChain(M = M,nStates = chainParams$nStates, discreteMC = chainParams$discreteMC, g = chainParams$g, d = chainParams$d)
     F_weights=x$F_weights; F_support = x$F_support
     varTruth = sum(F_weights*(1+F_support)/(1-F_support))
-    g_coefs= NULL
+    opt=list(g=x$g_coefs)
     x = x$x
-  }else if(chainParams$type == "GLM"){
-    x = generateBayesianGLMChain(M=M, X = chainParams$X, y = chainParams$y, link=chainParams$link, warmup = chainParams$warmup)
-    F_weights = NULL; F_support = NULL
-    g_coefs= NULL
-    if(is.null(chainParams$varTruth)){
-      
-      varTruth = NULL
-      
-    }
+  }else if(chainParams$type %in% c("glm","glmer")){
     
+    fit = with(chainparams,
+               generateBayesianGLMChain(
+                 formula = formula,
+                 data = data,
+                 type = type,
+                 offset = offset,
+                 family = family,
+                 autoscale = autoscale,
+                 chains = 1,
+                 M = M,
+                 warmup = warmup)
+    )
+    
+    F_weights = NULL; F_support = NULL
+    opt=list(fit=fit)
+    if(is.null(chainParams$varTruth)){
+      varTruth = NULL
+    }
+    x = as.array(fit)[,1,]
   }
   
-  
-  
   return(list(type=chainParams$type, x=x, varTruth = varTruth,
-              F_weights=F_weights,F_support = F_support, g_coefs = g_coefs))
+              F_weights=F_weights,F_support = F_support, opt = opt))
 }
 
 
@@ -96,23 +103,37 @@ generateAR1Chain = function(M,rho){
 }
 
 #'@export
-generateBayesianGLMChain = function(X,y, M = 1000, link = link, warmup=1000){
+generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), autoscale=TRUE, chains=1, M = 1000, warmup=1000){
   
-  n=dim(X)[1]
-  p=dim(X)[2]
+  type = match.arg(type, c("glm","glmer"))
+  if(type=="glm"){
+    fit=stan_glm(formula = formula,
+                 offset = offset,
+                 data=data,
+                 family = family,
+                 prior = normal(autoscale = autoscale),
+                 prior_intercept = normal(autoscale = autoscale),
+                 prior_aux = exponential(autoscale= autoscale),
+                 chains=chains, # the number of markov chains
+                 iter=M+warmup, # the number of iterations for each chain (including warmup)
+                 warmup=warmup  # the number of warmup (aka burnin) iterations
+    ) 
+  }else if(type=="glmer"){
+    fit=stan_glmer(formula = formula,
+                   offset = offset,
+                   data=data,
+                   family = family,
+                   prior = normal(autoscale = autoscale),
+                   prior_intercept = normal(autoscale = autoscale),
+                   prior_aux = exponential(autoscale= autoscale),
+                   prior_covariance = decov(),
+                   chains=chains, # the number of markov chains
+                   iter=M+warmup, # the number of iterations for each chain (including warmup)
+                   warmup=warmup  # the number of warmup (aka burnin) iterations
+    ) 
+  }
   
-  df=data.frame(X,y)
-  
-  value=stan_glm(y~.,
-                 data=df,
-                 family = binomial(link = link), 
-                 prior = normal(0,1,autoscale=FALSE), #probably can change to 1 for the standard deviation
-                 prior_intercept = normal(0,1,autoscale=FALSE), #likewise change to 1
-                 chains=1,init=0,iter=M+warmup,warmup=warmup,refresh=0)
-  
-  
-  chain = data.frame(value$stanfit@sim$samples)[,1:(p+1)]
-  return(chain)
+  return(fit)
   
 }
 
