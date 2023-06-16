@@ -10,7 +10,7 @@
 generateChain = function(chainParams){
   #chainParams = list(type="AR",  M = 10000, rho = rho)
   #chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
-  #chainparams = list(type="glmer", M = 10000, formula = y ~ roach1 + treatment+(1|senior),data = roaches, type = 'glmer',offset = with(roaches,log(exposure2)),family = rstanarm::neg_binomial_2(),autoscale = TRUE,warmup=1000)
+  #chainParams = list(type="glmer", M = 10000, formula = y ~ roach1 + treatment+(1|senior),data = roaches, type = 'glmer',offset = with(roaches,log(exposure2)),family = rstanarm::neg_binomial_2(),autoscale = TRUE,warmup=1000)
   
   M = chainParams$M
   if(chainParams$type=="AR"){
@@ -28,7 +28,7 @@ generateChain = function(chainParams){
     x = x$x
   }else if(chainParams$type %in% c("glm","glmer")){
     
-    fit = with(chainparams,
+    fit = with(chainParams,
                generateBayesianGLMChain(
                  formula = formula,
                  data = data,
