@@ -8,9 +8,18 @@
 #'
 #'@export
 generateChain = function(chainParams){
-  #chainParams = list(type="AR",  M = 10000, rho = rho)
-  #chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
-  #chainParams = list(type="glmer", M = 10000, formula = y ~ roach1 + treatment+(1|senior),data = roaches, type = 'glmer',offset = with(roaches,log(exposure2)),family = rstanarm::neg_binomial_2(),autoscale = TRUE,warmup=1000)
+  # chainParams = list(type="AR",  M = 10000, rho = rho)
+  # chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
+  # chainParams = list(
+  #   type = "glmer",
+  #   M = 10000,
+  #   formula = y ~ I(roach1 / 100) + treatment + (1 |senior),
+  #   data = roaches,
+  #   offset = with(roaches, log(exposure2)),
+  #   family = rstanarm::neg_binomial_2(),
+  #   warmup = 1000,
+  #   adapt_delta = .995
+  # )
   
   M = chainParams$M
   if(chainParams$type=="AR"){
@@ -28,18 +37,17 @@ generateChain = function(chainParams){
     x = x$x
   }else if(chainParams$type %in% c("glm","glmer")){
     
-    fit = with(chainParams,
-               generateBayesianGLMChain(
-                 formula = formula,
-                 data = data,
-                 type = type,
-                 offset = offset,
-                 family = family,
-                 autoscale = autoscale,
-                 chains = 1,
-                 M = M,
-                 warmup = warmup)
-    )
+    fit = generateBayesGLMChain(
+      formula = chainParams$formula,
+      data = chainParams$data,
+      type = chainParams$type,
+      offset = chainParams$offset,
+      family = chainParams$family,
+      chains = 1,
+      M = chainParams$M,
+      warmup = chainParams$warmup,
+      adapt_delta = chainParams$adapt_delta)
+    
     
     F_weights = NULL; F_support = NULL
     opt=list(fit=fit)
@@ -51,41 +59,6 @@ generateChain = function(chainParams){
   
   return(list(type=chainParams$type, x=x, varTruth = varTruth,
               F_weights=F_weights,F_support = F_support, opt = opt))
-}
-
-
-
-#'@export
-approxAsympVar = function(chainParams,nIters, parallel=FALSE,nclust=parallel::detectCores()-2){
-  # approximate asymp.variance(s) based on nIters parallel chains (baed on chainParams)
-  
-  if(nIters < 3) stop("nIters at least needs to be 3")
-  if(parallel){
-    cl=snow::makeSOCKcluster(nclust)
-    registerDoSNOW(cl)
-    snow::clusterExport(cl,list=c("chainParams"))
-    
-  }else{
-    foreach::registerDoSEQ()
-  }
-  pb <- txtProgressBar(max = nIters, style = 3)
-  progress <- function(n) setTxtProgressBar(pb, n)
-  opts <- list(progress = progress)
-  
-  sim_all = 
-    foreach(i=1:nIters,.options.snow=opts,.packages = c("rstanarm","momentLS"))%dopar%{
-    sim_i = generateChain(chainParams)$x
-    if(is.null(dim(sim_i))){sim_i = matrix(sim_i,ncol=1)}
-    sim_i
-  }
-  
-  xbar = sapply(sim_all,function(x) apply(x,2,mean)) # nrow = dimension of chain, ncol = nIters
-  if(is.null(dim(xbar))){xbar = matrix(xbar,nrow=1)}
-  avar = apply(xbar,1,var)*chainParams$M
-  
-  
-  if(parallel){stopCluster(cl)}
-  return(list(avar=avar,sim_all = sim_all))
 }
 
 
@@ -103,7 +76,7 @@ generateAR1Chain = function(M,rho){
 }
 
 #'@export
-generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), autoscale=TRUE, chains=1, M = 1000, warmup=1000,...){
+generateBayesGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), chains=1, M = 1000, warmup=1000,adapt_delta = NULL,...){
   
   type = match.arg(type, c("glm","glmer"))
   if(type=="glm"){
@@ -111,12 +84,10 @@ generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family 
                  offset = offset,
                  data=data,
                  family = family,
-                 prior = normal(autoscale = autoscale),
-                 prior_intercept = normal(autoscale = autoscale),
-                 prior_aux = exponential(autoscale= autoscale),
                  chains=chains, # the number of markov chains
                  iter=M+warmup, # the number of iterations for each chain (including warmup)
                  warmup=warmup,  # the number of warmup (aka burnin) iterations
+                 adapt_delta=adapt_delta,
                  ...
     ) 
   }else if(type=="glmer"){
@@ -124,13 +95,10 @@ generateBayesianGLMChain = function(formula,  data, type, offset = NULL, family 
                    offset = offset,
                    data=data,
                    family = family,
-                   prior = normal(autoscale = autoscale),
-                   prior_intercept = normal(autoscale = autoscale),
-                   prior_aux = exponential(autoscale= autoscale),
-                   prior_covariance = decov(),
                    chains=chains, # the number of markov chains
                    iter=M+warmup, # the number of iterations for each chain (including warmup)
                    warmup=warmup,  # the number of warmup (aka burnin) iterations
+                   adapt_delta =adapt_delta,
                    ...
     ) 
   }
