@@ -18,6 +18,7 @@ SR1 <-
              s_alpha = NULL,
              XtX = NULL,
              Xtr = NULL,
+             alphaGrid = NULL,
              input = NULL)
   ) {
     
@@ -42,29 +43,39 @@ SR1 <-
     ##### relative tolerance:
     tol=tol*sqrt(norm2_r)
     
-    if(is.null(precomputed$s_alpha)){s_xTemp  = sqrt((1+xTemp^2)/(1-xTemp^2))}else{s_xTemp = precomputed$s_alpha}
     
     ## precompute Xtr and XtX ##
     ## Compute Xtr
     if(is.null(precomputed$Xtr)){
       Xtr = Xtr_cpp(x=xTemp, a=r)
     }else{
-      Xtr = precomputed$Xtr
-      if(length(Xtr)!=length(xTemp)){stop("length(Xtr)!=length(alphaGrid)")}
-      if(!is.null(precomputed$input)){
-        stopifnot( abs(precomputed$input-r) <1e-4)
+      # check that Xtr was computed using the correct alphaGrid, input
+      if(is.null(precomputed$input)){
+        stop("When Xtr is not NULL, the precomputed list should contain input autocovariance estimator")}else{
+          stopifnot( abs(precomputed$input-r) <1e-4)
+        }
+      if(is.null(precomputed$alphaGrid)){stop("When Xtr is not NULL, the precomputed list should contain alphaGrid")}else{
+        stopifnot( abs(precomputed$alphaGrid-xTemp) <1e-4)
       }
+      Xtr = precomputed$Xtr
     }
     
     
     ## Compute XtX
+    
+    if(is.null(precomputed$s_alpha)){s_xTemp  = sqrt((1+xTemp^2)/(1-xTemp^2))}else{s_xTemp = precomputed$s_alpha}
+    
     if(is.null(precomputed$XtX)){
       XtX=makeXtX(xTemp, s_x = s_xTemp)
     }else{
+      # check that XtX was computed using the correct alphaGrid
+      if(is.null(precomputed$alphaGrid)){stop("when XtX is not NULL, the precomputed list should contain alphaGrid")}else{
+        stopifnot( abs(precomputed$alphaGrid-xTemp) <1e-4)
+      }
       XtX = precomputed$XtX
-      if(any(dim(XtX)!=c(length(xTemp),length(xTemp)))){stop("dimension of XtX should equal to the size of alphaGrid")}
+      
     }
-    
+    ###if(is.null(precomputed$s_alpha)){s_xTemp  = sqrt((1+xTemp^2)/(1-xTemp^2))}else{s_xTemp = precomputed$s_alpha}
     
     ## support reduction algorithm ##
     
@@ -181,6 +192,10 @@ SR1 <-
     res = structure(
       list(weights = weights,
            support = support,
+           inds = inds,
+           XtX = XtX,
+           s_alpha = s_xTemp,
+           Xtr = Xtr,
            iter = count,
            fvals = fvals,
            minGrad = min(gradient),
