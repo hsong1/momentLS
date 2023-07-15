@@ -57,6 +57,7 @@ SR1 <-
       if(is.null(precomputed$alphaGrid)){stop("When Xtr is not NULL, the precomputed list should contain alphaGrid")}else{
         stopifnot( abs(precomputed$alphaGrid-xTemp) <1e-4)
       }
+      if(length(precomputed$Xtr)!=length(xTemp)){stop("length(Xtr)!=length(xTemp)")}
       Xtr = precomputed$Xtr
     }
     

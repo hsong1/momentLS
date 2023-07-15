@@ -1,10 +1,10 @@
 Package: momentLS
 Type: Package
-Title: What the package does (short line)
+Title: Moment LS estimator
 Version: 1.0
-Date: 2023-06-13
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Date: 2023-07-05
+Author: Hyebin Song, Stephen Berg
+Maintainer: Hyebin Song <hps5320@psu.edu>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Imports: 
