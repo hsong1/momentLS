@@ -64,8 +64,10 @@ makeGrid <-
 
 
 
-#' compute asymptotic variance of a moment sequence (weights, support)
-#'@export
+#' Compute asymptotic variance of a moment sequence (weights, support)
+#' @param weights weights of a moment sequence
+#' @param support support of a moment sequence
+#' @export
 asympVariance<-function(weights,support){
   avar=sum(weights*(1+support)/(1-support))
   return(avar)
@@ -82,8 +84,10 @@ findIndices = function(support, alphaGrid){
   return(ind)
 }
 
-#' compute first M moments of a moment sequence (weights, support)
-#'@export
+#' Compute first M moments of a moment sequence (weights, support)
+#' @param weights weights of a moment sequence
+#' @param support support of a moment sequence
+#' @export
 computeMoments = function(support,weights,M=100){
   moments=rep(0,M)
   for (i in 1:M){

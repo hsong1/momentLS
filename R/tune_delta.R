@@ -10,11 +10,14 @@ choose_mhat = function(rc, c1,c2, incr = 1){
   mhat = max(1,mhat)
   return(mhat)
 }
-
+#' Tune delta for momentLS estimators
+#' 
+#' @description
+#' Tune based on a modification of an adaptive bandwidth selection method by Politis <https://doi.org/10.1080/10485250310001604659>. See also our paper <https://arxiv.org/abs/2207.12705>.
 #'@export
 tune_delta = function(r, 
-                      method= c("init","ft"), 
-                      seq_type = c("raw","even","average"),
+                      method= "ft", 
+                      seq_type = "average",
                       const = .5,
                       c1=1,c2=1){
   

@@ -2,10 +2,19 @@
 % Please edit documentation in R/simulateData.R
 \name{generateChain}
 \alias{generateChain}
-\title{Codes for simulating some reversible Markov chains}
+\title{Simulate some reversible Markov chains}
 \usage{
 generateChain(chainParams)
 }
 \description{
-Codes for simulating some reversible Markov chains
+Simulate some reversible Markov chains
+}
+\examples{
+# Simulate an AR1 chain
+chainParams = list(type="AR",  M = 10000, rho = 0.5)
+ch_ar1 = generateChain(chainParams)
+
+# Simulate a finite state space MH chain
+chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = 100), d = NULL)
+ch_mh = generateChain(chainParams)
 }

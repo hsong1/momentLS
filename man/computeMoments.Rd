@@ -2,10 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{computeMoments}
 \alias{computeMoments}
-\title{compute first M moments of a moment sequence (weights, support)}
+\title{Compute first M moments of a moment sequence (weights, support)}
 \usage{
 computeMoments(support, weights, M = 100)
 }
+\arguments{
+\item{support}{support of a moment sequence}
+
+\item{weights}{weights of a moment sequence}
+}
 \description{
-compute first M moments of a moment sequence (weights, support)
+Compute first M moments of a moment sequence (weights, support)
 }

@@ -2,10 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{asympVariance}
 \alias{asympVariance}
-\title{compute asymptotic variance of a moment sequence (weights, support)}
+\title{Compute asymptotic variance of a moment sequence (weights, support)}
 \usage{
 asympVariance(weights, support)
 }
+\arguments{
+\item{weights}{weights of a moment sequence}
+
+\item{support}{support of a moment sequence}
+}
 \description{
-compute asymptotic variance of a moment sequence (weights, support)
+Compute asymptotic variance of a moment sequence (weights, support)
 }

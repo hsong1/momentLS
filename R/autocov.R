@@ -1,5 +1,8 @@
-#'@import stats
-#'@export
+#' Compute the empirical autocovariances of chain x
+#' @param x input chain
+#' @param center a logical value; TRUE for empirical mean centering
+#' @import stats
+#' @export
 autocov <-
   function(x,center=TRUE){
     xbar=x
