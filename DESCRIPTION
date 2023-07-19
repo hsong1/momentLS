@@ -2,17 +2,16 @@ Package: momentLS
 Type: Package
 Title: Moment LS estimator
 Version: 1.0
-Date: 2023-07-05
+Date: 2023-07-19
 Author: Hyebin Song, Stephen Berg
 Maintainer: Hyebin Song <hps5320@psu.edu>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Description: This package implements Moment LS estimators in "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
+License: GPL (>= 3)
 Imports: 
     doParallel,
     doSNOW,
     foreach,
     Rcpp (>= 1.0.10),
-    RcppEigen,
-    rstanarm
+    RcppEigen
 LinkingTo: Rcpp, RcppEigen
 RoxygenNote: 7.2.3

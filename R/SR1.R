@@ -1,13 +1,28 @@
+#' SR1
+#' 
+#' Fit the MomentLS estimator given the input autocovariance sequence estimator
+#' 
+#' @param r input autocovariance estimate
+#' @param delta parameter to specify appropriate moment space; use tune_delta if unknown
+#' @param alphaGrid a grid of x values from [-1+delta,1-delta]; will be automatically created if left unspecified
+#' @param init initialization for the SR algorithm
+#' @param tol algorithm tolerance
+#' @param maxit maximum number of iterations for support reduction algorithm
+#' @param gradTrace trace gradients if TRUE
+#' @param gridControl list which contains parameters to specify alphaGrid
+#' @param precomputed an optional list which can contain some precomputed quantities for computational speed-up
+#' @return a SR1fit object containing estimated support and weights
 #'@useDynLib momentLS
+#'@import Rcpp
 #'@export
 SR1 <-
   function(r, # input response vector
-           delta = 1/length(r),
+           delta,
            alphaGrid = NULL,
            init = NULL,
            tol = 10^-8, # alg. tolerance
            maxit = 1000,
-           gradTrace = TRUE,
+           gradTrace = FALSE,
            gridControl = list(
              nX = 1001, # number of grid points
              cm = FALSE, # completely monotone?

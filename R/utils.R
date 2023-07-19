@@ -72,7 +72,7 @@ asympVariance<-function(weights,support){
 }
 
 
-#'@export
+
 findIndices = function(support, alphaGrid){
   if(length(support)==0){ind=integer(0)}else{
     ind =sapply(1:length(support), function(j) which(abs(alphaGrid  - support[j])<1e-10) )
@@ -82,6 +82,7 @@ findIndices = function(support, alphaGrid){
   return(ind)
 }
 
+#' compute first M moments of a moment sequence (weights, support)
 #'@export
 computeMoments = function(support,weights,M=100){
   moments=rep(0,M)

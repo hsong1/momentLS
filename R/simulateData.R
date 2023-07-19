@@ -3,23 +3,13 @@
 #'@import doParallel
 #'@import parallel
 #'@import foreach
-#'@import rstanarm
+#'@import stats
 #'@useDynLib momentLS
 #'
 #'@export
 generateChain = function(chainParams){
   # chainParams = list(type="AR",  M = 10000, rho = rho)
   # chainParams = list(type="MH",  M = 10000,  nStates = 100, g = matrix(rnorm(100*1),ncol=1), discreteMC = simulate_discreteMC(nStates = nStates), d = NULL)
-  # chainParams = list(
-  #   type = "glmer",
-  #   M = 10000,
-  #   formula = y ~ I(roach1 / 100) + treatment + (1 |senior),
-  #   data = roaches,
-  #   offset = with(roaches, log(exposure2)),
-  #   family = rstanarm::neg_binomial_2(),
-  #   warmup = 1000,
-  #   adapt_delta = .995
-  # )
   
   M = chainParams$M
   if(chainParams$type=="AR"){
@@ -35,26 +25,6 @@ generateChain = function(chainParams){
     varTruth = sum(F_weights*(1+F_support)/(1-F_support))
     opt=list(g=x$g_coefs)
     x = x$x
-  }else if(chainParams$type %in% c("glm","glmer")){
-    
-    fit = generateBayesGLMChain(
-      formula = chainParams$formula,
-      data = chainParams$data,
-      type = chainParams$type,
-      offset = chainParams$offset,
-      family = chainParams$family,
-      chains = 1,
-      M = chainParams$M,
-      warmup = chainParams$warmup,
-      adapt_delta = chainParams$adapt_delta)
-    
-    
-    F_weights = NULL; F_support = NULL
-    opt=list(fit=fit)
-    if(is.null(chainParams$varTruth)){
-      varTruth = NULL
-    }
-    x = as.array(fit)[,1,]
   }
   
   return(list(type=chainParams$type, x=x, varTruth = varTruth,
@@ -75,37 +45,6 @@ generateAR1Chain = function(M,rho){
   return(list(x=x, F_weights=1/(1-rho^2),F_support=rho ))
 }
 
-#'@export
-generateBayesGLMChain = function(formula,  data, type, offset = NULL, family = gaussian(), chains=1, M = 1000, warmup=1000,adapt_delta = NULL,...){
-  
-  type = match.arg(type, c("glm","glmer"))
-  if(type=="glm"){
-    fit=stan_glm(formula = formula,
-                 offset = offset,
-                 data=data,
-                 family = family,
-                 chains=chains, # the number of markov chains
-                 iter=M+warmup, # the number of iterations for each chain (including warmup)
-                 warmup=warmup,  # the number of warmup (aka burnin) iterations
-                 adapt_delta=adapt_delta,
-                 ...
-    ) 
-  }else if(type=="glmer"){
-    fit=stan_glmer(formula = formula,
-                   offset = offset,
-                   data=data,
-                   family = family,
-                   chains=chains, # the number of markov chains
-                   iter=M+warmup, # the number of iterations for each chain (including warmup)
-                   warmup=warmup,  # the number of warmup (aka burnin) iterations
-                   adapt_delta =adapt_delta,
-                   ...
-    ) 
-  }
-  
-  return(fit)
-  
-}
 
 #'@export
 generateMHChain = function(M,nStates, discreteMC, g = NULL, d = NULL){
@@ -134,6 +73,7 @@ generateMHChain = function(M,nStates, discreteMC, g = NULL, d = NULL){
   # x=with(discreteMC,simulateChain(pi_vec,Q,M,g)$x)
   return(list(x=x, F_weights = trueRepMeasure$weights, F_support = trueRepMeasure$support, g_coefs = trueRepMeasure$coefs))
 }
+
 
 
 #'@export
@@ -178,8 +118,6 @@ simulate_discreteMC = function(nStates){
   return(list(Q=Q,pi_vec=pi_vec,proposal = proposal))
 }
 
-
-
 simulateChain<-function(pi_vec,Q,n){
   v=rep(0,n)
   v[1]=which(rmultinom(1,1,prob=pi_vec)!=0)
@@ -189,7 +127,6 @@ simulateChain<-function(pi_vec,Q,n){
   
   return(v)
 }
-
 
 # mcsettings = simulate_discreteMC(nStates)
 # Q = mcsettings$Q

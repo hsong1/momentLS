@@ -15,6 +15,7 @@ choose_mhat = function(rc, c1,c2, incr = 1){
 tune_delta = function(r, 
                       method= c("init","ft"), 
                       seq_type = c("raw","even","average"),
+                      const = .5,
                       c1=1,c2=1){
   
   # compute empirical autocovariance
@@ -49,5 +50,5 @@ tune_delta = function(r,
   
   dhat  = max(1-exp(-0.5*( log(M)/trunc_pt)), 1/M)
   
-  return(c(trunc_pt=trunc_pt, dhat=dhat))
+  return(c(trunc_pt=trunc_pt, dhat=const*dhat))
 }

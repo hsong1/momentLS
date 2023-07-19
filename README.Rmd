@@ -1,19 +1,28 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # momentLS
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of momentLS is to implement Moment LS estimators in “Efficient
-shape-constrained inference for the autocovariance sequence from a
-reversible Markov chain” <https://arxiv.org/abs/2207.12705>
+The goal of momentLS is to implement Moment LS estimators in "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
 
 ## Installation
 
-You can install the development version of momentLS from
-[GitHub](https://github.com/) with:
+You can install the development version of momentLS from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -22,10 +31,9 @@ devtools::install_github("hsong1/momentLS")
 
 ## Example
 
-We provide a basic usage example of momentLS package using a simulated
-AR(1) chain:
+We provide a basic usage example of momentLS package using a simulated AR(1) chain:
 
-``` r
+```{r example}
 library(momentLS)
 
 # generate an AR(1) chain of length M with rho =.5
@@ -41,9 +49,10 @@ delta_hat = tune_delta(r,method="ft",seq_type="average") # tune delta
 m =SR1(r,delta = delta_hat[2]) # fit
 ```
 
+
 ### Asymptotic variance estimator comparison
 
-``` r
+```{r asymp_var}
 # compute the MomentLS asymptotic variance estimator
 MomentLS_avar = asympVariance(weights = m$weights, support = m$support) 
 
@@ -61,18 +70,13 @@ result =
 knitr::kable(t(result))
 ```
 
-| Truth | MomentLS |      BM |   OLBM | Init-pos | Init-dec | Init-conv |
-|------:|---------:|--------:|-------:|---------:|---------:|----------:|
-|     4 | 3.970975 | 4.37627 | 4.3261 | 3.926424 | 3.888211 |  3.884543 |
 
 ### Comparison of empirical and MomentLS autocovariances
 
-``` r
+```{r autocov_seq, out.width="50%", out.height="50%", fig.align="center"}
 # first 100 estimated autocovariances
 estimated_autocov = computeMoments(support = m$support, weights = m$weights,M = 100)
 plot(0:99, r[1:100], col="lightblue", xlab="lags", ylab = "autocovariances", 
      ylim= c(min(r[1:100], estimated_autocov),max(r[1:100], estimated_autocov)))
 points(0:99, estimated_autocov,pch=3)
 ```
-
-<img src="man/figures/README-autocov_seq-1.png" width="50%" height="50%" style="display: block; margin: auto;" />

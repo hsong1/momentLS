@@ -1,3 +1,4 @@
+#'@import stats
 #'@export
 autocov <-
   function(x,center=TRUE){
