@@ -1,10 +1,9 @@
-choose_mhat = function(rc, c1,c2, incr = 1){
+choose_mhat = function(rc, c1,c2,M, incr = 1){
   cond = FALSE; mhat = 0
-  M = length(rc)
   K_N=c1*round(sqrt(log(M)))
   ind = seq(from=incr, to = K_N, by=incr)
   while(1){
-    cond = all(abs(rc[mhat+ind])<= c2*sqrt(log(M)/M))
+    cond = all(abs(rc[mhat+ind])<= c2*log(M)*sqrt(1/M))
     if(cond){break}else{mhat = mhat+incr}
   }
   mhat = max(1,mhat)
@@ -34,21 +33,22 @@ tune_delta = function(r,
       # Gamma(ind_G-1) = gamma(2*(ind_G-1))+gamma(2*(ind_G-1) +1); needs to include 1,..., 2(ind_G-1)+2
     }else{
       rc = Gamma[-1] / Gamma[1]
-      ind_G = choose_mhat(rc = rc,c1 = c1,c2 = c2,incr = 1)
+      ind_G = choose_mhat(rc = rc,c1 = c1,c2 = c2,M=M, incr = 1)
     }
     trunc_pt = 2*(ind_G-1) +2
+    
   }else if(seq_type=="even"){
     if(method=="init"){
-      trunc_pt = min(which(r[seq(from=2,to=M,by=2)] <0 ))-2
+      trunc_pt = 2*(min(which(r[seq(from=1,to=M-1,by=2)] <0 )) -1)
     }else{
       rc = r[-1]/r[1]
-      trunc_pt = choose_mhat(rc=rc, c1=c1,c2=c2,incr=2)
+      trunc_pt = choose_mhat(rc=rc, c1=c1,c2=c2,M=M, incr=2)
     }
     
   }else if(seq_type=="raw"){
     if(method=="init"){stop("if method==init, seq_type needs to be average or even")}
     rc = r[-1]/r[1]
-    trunc_pt = choose_mhat(rc=rc, c1=c1,c2=c2,incr=1)
+    trunc_pt = choose_mhat(rc=rc, c1=c1,c2=c2,M=M, incr=1)
   }
   
   dhat  = max(1-exp(-0.5*( log(M)/trunc_pt)), 1/M)
