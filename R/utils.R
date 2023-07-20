@@ -39,6 +39,18 @@ makeGrid <-
     scale = match.arg(scale, choices = c("log","equidist"))
     xTemp=NULL
     
+    if (upper_threshold>=1){
+      warning("delta > 0 required (upper_threshold < 1). Using delta = 1e-6, upper_threshold = 1-1e-6")
+      upper_threshold=1-1e-6
+    }else if (upper_threshold==0){
+      warning("delta = 1 (upper_threshold = 0). Returning grid with a single point: alphaGrid = c(0).")
+      xTemp=c(0)
+      return(xTemp)
+    }else if (upper_threshold<0){
+      stop("delta <= 1 required (upper_threshold >= 0)")
+    }
+    
+    
     if (scale=="log"){
       if(nX%%2!=1){nX=nX+1; warning("provide odd nX when scale=log")}
       if(!cm){nX2 = (nX+1)/2}else{nX2=nX}
