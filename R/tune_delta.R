@@ -1,9 +1,10 @@
+#'@export
 choose_mhat = function(rc, c1,c2,M, incr = 1){
   cond = FALSE; mhat = 0
   K_N=c1*round(sqrt(log(M)))
   ind = seq(from=incr, to = K_N, by=incr)
   while(1){
-    cond = all(abs(rc[mhat+ind])<= c2*log(M)*sqrt(1/M))
+    cond = all(abs(rc[mhat+ind])<= c2*sqrt(log(M)/M))
     if(cond){break}else{mhat = mhat+incr}
   }
   mhat = max(1,mhat)
