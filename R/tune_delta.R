@@ -1,8 +1,8 @@
 #'@export
-choose_mhat = function(rc, c1,c2,M, incr = 1){
+choose_mhat = function(rc,c1,c2,M, incr = 1){
   cond = FALSE; mhat = 0
-  K_N=c1*round(sqrt(log(M)))
-  ind = seq(from=incr, to = K_N, by=incr)
+  max_ind = max(incr, c1)
+  ind = seq(from=incr, to = max_ind, by=incr)
   while(1){
     cond = all(abs(rc[mhat+ind])<= c2*sqrt(log(M)/M))
     if(cond){break}else{mhat = mhat+incr}
