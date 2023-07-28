@@ -5,7 +5,7 @@ choose_mhat = function(rc,c1,c2,M, incr = 1){
   ind = seq(from=incr, to = max_ind, by=incr)
   while(1){
     cond = all(abs(rc[mhat+ind])<= c2*sqrt(log(M)/M))
-    if(cond){break}else{mhat = mhat+incr}
+    if(cond||is.na(cond)){break}else{mhat = mhat+incr}
   }
   mhat = max(1,mhat)
   return(mhat)
