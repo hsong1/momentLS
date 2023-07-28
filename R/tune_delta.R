@@ -58,7 +58,9 @@ truncation_point = function(r,
     if(method=="init"){
       index = seq(from=2,to=M-1,by=2)
       k = min(which(rc[index]<0)) # rc[index[k-1]] > 0; rc[index[k]] <0
-      if(!is.infinite(k)){trunc_pt = index[k-1]}else{trunc_pt = max(index)}
+      if(k==1){trunc_pt = 2}else{
+        if(!is.infinite(k)){trunc_pt = index[k-1]}else{trunc_pt = max(index)}
+      }
       
     }else{
       trunc_pt = choose_mhat(rc=rc, c1=c1,c2=c2,M=M, incr=2)
@@ -92,7 +94,7 @@ choose_mhat = function(rc,c1,c2,M, incr = 1){
     cond = all(abs(rc[mhat+ind])<= c2*sqrt(log(M)/M))
     if(cond||is.na(cond)){break}else{mhat = mhat+incr}
   }
-  mhat = max(1,mhat)
+  mhat = max(incr,mhat)
   return(mhat)
 }
 
