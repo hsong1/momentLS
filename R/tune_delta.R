@@ -95,3 +95,8 @@ choose_mhat = function(rc,c1,c2,M, incr = 1){
   mhat = max(1,mhat)
   return(mhat)
 }
+
+#'@export
+compute_delta_hat = function(mhat,m){
+  1-exp(-0.5*( log(m)/mhat))
+}
