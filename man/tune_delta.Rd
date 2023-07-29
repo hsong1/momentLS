@@ -9,8 +9,9 @@ tune_delta(
   nSplits = 1,
   method = "ft",
   seq_type = "even",
-  const = 1,
-  c_M_const = 0.1
+  const = 0.5,
+  c_M_const = 0.1,
+  fcn.summarize = "median"
 )
 }
 \description{

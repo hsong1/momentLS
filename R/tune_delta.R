@@ -7,8 +7,9 @@ tune_delta = function(x,
                       nSplits = 1,
                       method= "ft", 
                       seq_type = "even",
-                      const = 1,
-                      c_M_const = 0.1){
+                      const = 0.5,
+                      c_M_const = 0.1,
+                      fcn.summarize = "median"){
   
   nSplits = round(nSplits)
   if(nSplits>1){
@@ -25,7 +26,13 @@ tune_delta = function(x,
                        c1 = 1,c2 = c_M_const*sqrt(log(m))))
   })
   
-  d = apply(d_all,1,mean)
+  fcn.summarize = match.arg(fcn.summarize, choices=c("mean","median"))
+  if(fcn.summarize =="mean"){
+    d = apply(d_all,1,mean)
+  }else if(fcn.summarize=="median"){
+    d = apply(d_all,1,median)
+  }
+  
   m = d[1] # average chain length per split
   m_trunc_pt = d[2]; # average truncation point
   
