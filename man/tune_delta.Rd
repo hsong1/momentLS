@@ -4,16 +4,9 @@
 \alias{tune_delta}
 \title{Tune delta for momentLS estimators}
 \usage{
-tune_delta(
-  x,
-  nSplits = 1,
-  method = "ft",
-  seq_type = "even",
-  const = 0.5,
-  c_M_const = 0.1,
-  fcn.summarize = "median"
-)
+tune_delta(x, nSplits = 1, c_M_const = 0, fcn.summarize = "median")
 }
 \description{
-Tune based on a modification of an adaptive bandwidth selection method by Politis <https://doi.org/10.1080/10485250310001604659>. See also our paper <https://arxiv.org/abs/2207.12705>.
+Tune based on a modification of an adaptive bandwidth selection method by Politis <https://doi.org/10.1080/10485250310001604659>. 
+See also our paper <https://arxiv.org/abs/2207.12705>.
 }
