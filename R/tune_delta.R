@@ -7,7 +7,7 @@
 #'@export
 tune_delta = function(x, 
                       nSplits = 1,
-                      c_M_const = 0.1,
+                      c_M_const = 0,
                       fcn.summarize = "median"){
   
   # split x into nSplits sub-chains
