@@ -65,8 +65,12 @@ find_mhat = function(r,c_M){
 }
 
 #'@export
-compute_delta_hat = function(mhat,M){
-  if(mhat > 0){delta = 1-exp(-0.5*( log(M)/mhat))}else if(mhat == 0){delta=1}
-  delta = max(delta, 1/M) # we require delta to be at least 1/M
-  return(delta)
+compute_delta_hat = function(M,mhat){
+  if(length(mhat)!=length(M)) {stop("length(mhat)!=length(M")}
+  deltas = foreach(i = 1:length(mhat),.combine="c")%do%{
+    if (mhat[i] > 0) {delta = 1 - exp(-0.5 * (log(M[i])/mhat[i]))}
+    else if (mhat[i] == 0) {delta = 1}
+    delta = max(delta, 1/M)
+  }
+  return(deltas)
 }
