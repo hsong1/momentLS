@@ -25,10 +25,11 @@ tune_delta = function(x,
     # rc_j(mhat+2) <= c_M*sqrt(log(m_j)/m_j)
     # where c_M = c_M_const*sqrt(log(m_j))
     mhat = find_mhat(r = r_j, c_M = c_M_const*sqrt(log(m_j)))
-    c(m_j, mhat)
+    dhat = compute_delta_hat(M = m_j,mhat = mhat)
+    c(m_j, mhat, dhat)
   })
-  mhat_all = t(mhat_all)
-  colnames(mhat_all)= c("m_j","mhat_j")
+  mhat_all = data.frame(t(mhat_all))
+  colnames(mhat_all)= c("M","m_hat","d_hat")
   
   fcn.summarize = match.arg(fcn.summarize, choices=c("mean","median"))
   
