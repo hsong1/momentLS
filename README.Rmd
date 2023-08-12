@@ -33,20 +33,26 @@ devtools::install_github("hsong1/momentLS")
 
 We provide a basic usage example of momentLS package using a simulated AR(1) chain:
 
-```{r example}
+```{r chain, fig.show="hold", out.width="50%"}
 library(momentLS)
 
 # generate an AR(1) chain of length M with rho =.5
 set.seed(12345); M=10000
 chainParams = list(type="AR", rho = 0.5, M = M)
 ch = generateChain(chainParams)
+x = ch$x # AR1 chain
+par(mar = c(4, 4, .1, .1))
+plot(x, type="l"); acf(x)
+```
 
+```{r fit}
 # compute the empirical autocovariances
-r=autocov(ch$x)
+r = autocov(x)
+# tune delta
+delta_hat = tune_delta(x,nSplits = 5,c_M_const = 0)$delta*0.8
 
 # fit MomentLS
-delta_hat = tune_delta(r,method="ft",seq_type="average") # tune delta
-m =SR1(r,delta = delta_hat[2]) # fit
+m = SR1(r,delta = delta_hat) # fit
 ```
 
 
@@ -66,17 +72,65 @@ result =
     "Init-dec"=mcmc::initseq(ch$x)$var.dec,
     "Init-conv"=mcmc::initseq(ch$x)$var.con
   )
-
-knitr::kable(t(result))
 ```
 
+```{r asymp_var_result}
+library(flextable)
+library(tidyr)
+# display result
+data.frame(t(result)) %>% knitr::kable(digits = 3)
+```
 
 ### Comparison of empirical and MomentLS autocovariances
 
 ```{r autocov_seq, out.width="50%", out.height="50%", fig.align="center"}
 # first 100 estimated autocovariances
-estimated_autocov = computeMoments(support = m$support, weights = m$weights,M = 100)
+estimated_autocov = computeMoments(support = m$support, weights = m$weights, M = 100)
 plot(0:99, r[1:100], col="lightblue", xlab="lags", ylab = "autocovariances", 
      ylim= c(min(r[1:100], estimated_autocov),max(r[1:100], estimated_autocov)))
 points(0:99, estimated_autocov,pch=3)
+```
+
+
+### Performance comparison between asymptotic variance estimators using B=100 simulations
+
+```{r repeat}
+library(foreach)
+B=100;
+results = foreach(b=1:B,.combine="rbind")%do%{
+  set.seed(b)
+  ch = generateChain(chainParams) # generate a chain
+  r = autocov(ch$x) # compute empirical autocov
+  delta_hat = tune_delta(x,nSplits = 1,,c_M_const = 0)$delta*0.8  # tune delta
+  m = SR1(r,delta = delta_hat) # fit momentLS
+  m_orcl = SR1(r,delta = 1-chainParams$rho) # fit momentLS using oracle delta (=1-rho)
+
+  MomentLS_avar = asympVariance(weights = m$weights, support = m$support)
+  MomentLS_avar_orcl = asympVariance(weights = m_orcl$weights, support = m_orcl$support)
+
+  # comparison with  BM, OLBM, init-seq estimators
+  result =
+    c("Truth"=ch$varTruth,
+      "MomentLS"=MomentLS_avar,
+      "MomentLS(orcl)"=MomentLS_avar_orcl,
+      "BM"=M*mcmcse::mcse(ch$x,method="bm")$se^2,
+      "OLBM"=M*mcmcse::mcse(ch$x,method="obm")$se^2,
+      "Init-pos"=mcmc::initseq(ch$x)$var.pos,
+      "Init-dec"=mcmc::initseq(ch$x)$var.dec,
+      "Init-conv"=mcmc::initseq(ch$x)$var.con
+    )
+  return(result)
+}
+
+```
+
+```{r summarize_results, message=FALSE, warning=FALSE}
+library(dplyr)
+aVar_sqdiffs = data.frame((results[,-1] - results[,1])^2)
+aVar_sqdiffs %>%
+  gather() %>%
+  rename(Estimator=key) %>%
+  group_by(Estimator) %>%
+  summarise(Average_MSE=mean(value),SE=sd(value)/sqrt(B)) %>%
+  knitr::kable(digits=3)
 ```
