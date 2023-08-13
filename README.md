@@ -43,10 +43,10 @@ plot(x, type="l"); acf(x)
 # compute the empirical autocovariances
 r = autocov(x)
 # tune delta
-delta_hat = tune_delta(x,nSplits = 5,c_M_const = 0)$delta*0.8
+delta_tilde = tune_delta(x,nSplits = 5,c_M_const = 0)$delta*0.8
 
 # fit MomentLS
-m = SR1(r,delta = delta_hat) # fit
+m = SR1(r,delta = delta_tilde) # fit
 ```
 
 ### Asymptotic variance estimator comparison
@@ -99,8 +99,8 @@ results = foreach(b=1:B,.combine="rbind")%do%{
   set.seed(b)
   ch = generateChain(chainParams) # generate a chain
   r = autocov(ch$x) # compute empirical autocov
-  delta_hat = tune_delta(x,nSplits = 1,,c_M_const = 0)$delta*0.8  # tune delta
-  m = SR1(r,delta = delta_hat) # fit momentLS
+  delta_tilde = tune_delta(ch$x,nSplits = 5,c_M_const = 0)$delta*0.8  # tune delta
+  m = SR1(r,delta = delta_tilde) # fit momentLS
   m_orcl = SR1(r,delta = 1-chainParams$rho) # fit momentLS using oracle delta (=1-rho)
 
   MomentLS_avar = asympVariance(weights = m$weights, support = m$support)
@@ -138,6 +138,6 @@ aVar_sqdiffs %>%
 | Init.conv      |       0.069 | 0.012 |
 | Init.dec       |       0.082 | 0.014 |
 | Init.pos       |       0.103 | 0.018 |
-| MomentLS       |       0.038 | 0.005 |
+| MomentLS       |       0.054 | 0.012 |
 | MomentLS.orcl. |       0.024 | 0.004 |
 | OLBM           |       0.206 | 0.030 |

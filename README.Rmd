@@ -49,10 +49,10 @@ plot(x, type="l"); acf(x)
 # compute the empirical autocovariances
 r = autocov(x)
 # tune delta
-delta_hat = tune_delta(x,nSplits = 5,c_M_const = 0)$delta*0.8
+delta_tilde = tune_delta(x,nSplits = 5,c_M_const = 0)$delta*0.8
 
 # fit MomentLS
-m = SR1(r,delta = delta_hat) # fit
+m = SR1(r,delta = delta_tilde) # fit
 ```
 
 
@@ -101,8 +101,8 @@ results = foreach(b=1:B,.combine="rbind")%do%{
   set.seed(b)
   ch = generateChain(chainParams) # generate a chain
   r = autocov(ch$x) # compute empirical autocov
-  delta_hat = tune_delta(x,nSplits = 1,,c_M_const = 0)$delta*0.8  # tune delta
-  m = SR1(r,delta = delta_hat) # fit momentLS
+  delta_tilde = tune_delta(ch$x,nSplits = 5,c_M_const = 0)$delta*0.8  # tune delta
+  m = SR1(r,delta = delta_tilde) # fit momentLS
   m_orcl = SR1(r,delta = 1-chainParams$rho) # fit momentLS using oracle delta (=1-rho)
 
   MomentLS_avar = asympVariance(weights = m$weights, support = m$support)
