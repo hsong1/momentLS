@@ -11,7 +11,8 @@ tune_delta(x, nSplits = 1, c_M_const = 0, fcn.summarize = "mean")
 
 \item{nSplits}{number of splits}
 
-\item{c_M_const}{c_M constant in \eqn{\hat{m} = \min\{t\in 2\mathbb{N}; \hat{\rho}_M(t+2) \le c_M\sqrt{\log M/M}\}}}
+\item{c_M_const}{constant in \eqn{c_M = c_M_const * \sqrt{\log M}} in the mhat criterion in 
+\eqn{\hat{m} = \min\{t\in 2\mathbb{N}; \hat{\rho}_M(t+2) \le c_M \sqrt{\log M/M}\}}}
 
 \item{fcn.summarize}{if fcn.summarize =="mean", the average of deltas from each split will be returned. If fcn.summarize =="median", median of deltas from each split will be returned.}
 }
