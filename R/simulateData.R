@@ -30,8 +30,15 @@ generateChain = function(chainParams){
   }else if(chainParams$type =="MH"){
     x= generateMHChain(M = M,nStates = chainParams$nStates, discreteMC = chainParams$discreteMC, g = chainParams$g, d = chainParams$d)
     F_weights=x$F_weights; F_support = x$F_support
-    varTruth = sum(F_weights*(1+F_support)/(1-F_support))
-    opt=list(g=x$g_coefs)
+    
+    if(chainParams$d==1){
+      varTruth = sum(F_weights*(1+F_support)/(1-F_support))
+    }else if(chainParams$d>1){
+      varTruth = mtvAsympVariance(coefs = x$g_coefs, support = F_support)
+    }
+    
+    # g_coef_j= <g,Phi_j>_pi
+    opt=list(g_coefs=x$g_coefs)
     x = x$x
   }
   
@@ -39,7 +46,10 @@ generateChain = function(chainParams){
               F_weights=F_weights,F_support = F_support, opt = opt))
 }
 
-
+mtvAsympVariance = function(coefs,support){
+  if(is.null(dim(coefs))){coefs= matrix(coefs,ncol=1)}
+  Reduce("+", lapply(1:nrow(coefs), function(k) outer(coefs[k,],coefs[k,])*(1+support[k])/(1-support[k]) ))
+}
 
 #'@export
 generateAR1Chain = function(M,rho){
@@ -58,6 +68,7 @@ generateAR1Chain = function(M,rho){
 generateMHChain = function(M,nStates, discreteMC, g = NULL, d = NULL){
   
   if(is.null(discreteMC)){
+    warning("invariant pi and MH Kernel Q simulated")
     discreteMC = simulate_discreteMC(nStates = nStates) # simulate pi_vec, Q
   }
   
@@ -66,6 +77,7 @@ generateMHChain = function(M,nStates, discreteMC, g = NULL, d = NULL){
   # compute g(Vt) 
   if(is.null(g)){
     if(is.null(d)){d=1}
+    warning("g simulated from N(0,Id)")
     g = matrix(rnorm(nStates*d),ncol=d) # simulate g
   }else{
     if( is.null(dim(g))){
