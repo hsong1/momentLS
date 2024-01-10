@@ -31,6 +31,7 @@ generateChain = function(chainParams){
     x= generateMHChain(M = M,nStates = chainParams$nStates, discreteMC = chainParams$discreteMC, g = chainParams$g, d = chainParams$d)
     F_weights=x$F_weights; F_support = x$F_support
     
+    if(is.null(chainParams$d)){chainParams$d=1}
     if(chainParams$d==1){
       varTruth = sum(F_weights*(1+F_support)/(1-F_support))
     }else if(chainParams$d>1){
