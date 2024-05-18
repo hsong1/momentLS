@@ -13,24 +13,23 @@
 #'   \item delta: estimated delta (mean or median from \eqn{\hat{delta}_M} from each split.)
 #'   \item mhat_all: estimated \eqn{\hat{m}} and \eqn{\hat{delta}_M} from each split.
 #' }
+#' 
 #'@export
 tune_delta = function(x, 
-                      nSplits = 1,
-                      c_M_const = 0,
-                      fcn.summarize = "mean"){
+                          nSplits = 1,
+                          c_M_const = 0,
+                          fcn.summarize = "mean"){
   
   r_j_all = compute_autocov_splits(x,nSplits)
   
-  mhat_all = sapply(1:nSplits, function(j){
-    r_j =  r_j_all[[j]]
+  mhat_all = sapply(r_j_all, function(r_j, c_M_const){
     m_j = length(r_j)
-    # find first mhat such that 
-    # rc_j(mhat+2) <= c_M*sqrt(log(m_j)/m_j)
-    # where c_M = c_M_const*sqrt(log(m_j))
-    mhat = find_mhat(r = r_j, c_M = c_M_const*sqrt(log(m_j)))
-    dhat = compute_delta_hat(M = m_j,mhat = mhat)
-    c(m_j, mhat, dhat)
-  })
+    mhat = find_mhat(r = r_j, c_M = c_M_const * sqrt(log(m_j)))
+    if(mhat>0){dhat=1 - exp(-0.5 * (log(m_j)/mhat))}else{dhat=1}
+    dhat= max(dhat,1/m_j)
+    return(c(m_j,mhat,dhat))},
+    c_M_const=c_M_const)
+  
   mhat_all = data.frame(t(mhat_all))
   colnames(mhat_all)= c("M","m_hat","d_hat")
   
@@ -46,6 +45,7 @@ tune_delta = function(x,
   return(list(delta = delta_hat, mhat_all = mhat_all))
 }
 
+
 #'@export
 compute_autocov_splits = function(x,L){
   
@@ -55,22 +55,24 @@ compute_autocov_splits = function(x,L){
   # l=2,...,L B^{-1} sum t=(l-1)*B-k to l*B-k g(Xt)g(Xt+k)
   
   # center
-  xc = x-mean(x)
+  xc = x - mean(x)
   B = floor(length(xc)/L)
-  xc = xc[1:(L*B)] # make M to be the multiple of L
-  
-  cum_sums = foreach(l=1:L)%do%{
-    (l*B)*autocov(xc[1:(l*B)],center = F)[1:B]
+  xc = xc[1:(L * B)]
+  cum_sums = list()
+  for(l in 1:L){
+    cum_sums[[l]] = (l * B) * autocov(xc[1:(l * B)], center = F)[1:B]
+  }
+  autocov_batches = list()
+  autocov_batches[[1]] = (1/B) * cum_sums[[1]]
+  for(l in 2:L){
+    autocov_batches[[l]] = (1/B) * (cum_sums[[l]] - cum_sums[[l - 1]])
+    
   }
   
-  
-  autocov_batches = foreach(l=1:L)%do%{
-    if(l==1){(1/B)*cum_sums[[1]]}else{
-      (1/B)*(cum_sums[[l]]-cum_sums[[l-1]])
-    }
-  }
   return(autocov_batches)
 }
+
+
 
 #'@export
 find_mhat = function(r,c_M){
