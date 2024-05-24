@@ -7,8 +7,8 @@
 #' @export
 autocov<-function(x,center=TRUE){
   
-  if (is.vector(x)){
-    
+  if (is.null(dim(x))){
+    # vector
     if (center){xbar=x-mean(x)}else{xbar = x}
     n=length(xbar) # length of x
     xbar2=c(xbar,rep(0,n)) # zero-pad
@@ -17,9 +17,8 @@ autocov<-function(x,center=TRUE){
     unadj=Re(fft(norms,inverse=TRUE)[1:n])
     adj=unadj/(2*n^2)
     return(adj)
-  }
-  
-  if (is.matrix(x)){
+  }else{
+    if(length(dim(x))!=2){stop("length(dim(x)) should be 2")}
     p=ncol(x)
     n=nrow(x)
     
