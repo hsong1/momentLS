@@ -65,7 +65,7 @@ L2diff_L2Moment = function(r,support ,weights, precomputed=list(norm2_r = NULL,X
     
     f = norm2_r+norm2_m-2*innerProduct
   }
-  if(f<0)stop("wrong precomputed inputs")
+  if(f<0)warning("wrong precomputed inputs")
   return(f)
   
 }
