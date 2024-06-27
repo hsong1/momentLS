@@ -2,6 +2,7 @@
 % Please edit documentation in R/momentLS.R
 \docType{package}
 \name{momentLS}
+\alias{momentLS-package}
 \alias{momentLS}
 \title{momentLS}
 \description{

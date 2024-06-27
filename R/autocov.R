@@ -7,6 +7,8 @@
 #' @export
 autocov<-function(x,center=TRUE){
   
+  if(!is.null(dim(x))){if(length(dim(x))!=2){stop("length(dim(x)) should be 2")}}
+  if(!is.null(dim(x))){if(dim(x)[2]==1){dim(x) = NULL}}
   if (is.null(dim(x))){
     # vector
     if (center){xbar=x-mean(x)}else{xbar = x}

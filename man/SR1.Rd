@@ -6,15 +6,16 @@
 \usage{
 SR1(
   r,
-  delta,
+  delta = NULL,
   alphaGrid = NULL,
   init = NULL,
   tol = 10^-8,
   maxit = 1000,
   gradTrace = FALSE,
-  gridControl = list(nX = 1001, cm = FALSE, scale = "log"),
-  precomputed = list(norm2_r = NULL, s_alpha = NULL, XtX = NULL, Xtr = NULL, alphaGrid =
-    NULL, input = NULL)
+  n_alphas = 1001,
+  gridControl = list(cm = FALSE, scale = "log"),
+  precomputed = list(s_alpha = NULL, XtX = NULL, Xtr = NULL, alphaGrid = NULL, input =
+    NULL)
 )
 }
 \arguments{

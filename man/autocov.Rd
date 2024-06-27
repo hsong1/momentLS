@@ -2,15 +2,19 @@
 % Please edit documentation in R/autocov.R
 \name{autocov}
 \alias{autocov}
-\title{Compute the empirical autocovariances of chain x}
+\title{Compute the empirical auto (cross) covariances of chain x
+for a vector x, returns vector r with r[k] = lag (k-1) autocovariance (r[1]=lag 0 autocovariance )
+for n by p matrix x, returns array r with r[k,i,j]=lag (k-1) cross covariance of x[,i] with x[,j]}
 \usage{
 autocov(x, center = TRUE)
 }
 \arguments{
-\item{x}{input chain}
+\item{x}{input chain (vector or matrix)}
 
 \item{center}{a logical value; TRUE for empirical mean centering}
 }
 \description{
-Compute the empirical autocovariances of chain x
+Compute the empirical auto (cross) covariances of chain x
+for a vector x, returns vector r with r[k] = lag (k-1) autocovariance (r[1]=lag 0 autocovariance )
+for n by p matrix x, returns array r with r[k,i,j]=lag (k-1) cross covariance of x[,i] with x[,j]
 }
