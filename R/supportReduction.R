@@ -1,4 +1,4 @@
-supportReduction = function(XtX,Xtr, s_alpha, init = NULL, gradTrace = FALSE, tol = 1e-6){
+supportReduction = function(XtX,Xtr, s_alpha, init = NULL, gradTrace = FALSE, tol = 1e-6, maxit=1000){
   
   ## support reduction algorithm ##
   ### Input: scaled XtX and Xtr, and scaling factor s_alpha

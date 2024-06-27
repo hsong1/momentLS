@@ -25,9 +25,66 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// poissonKernel_cpp
+Eigen::ArrayXd poissonKernel_cpp(double rho, Eigen::ArrayXd& wseq);
+RcppExport SEXP _momentLS_poissonKernel_cpp(SEXP rhoSEXP, SEXP wseqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    rcpp_result_gen = Rcpp::wrap(poissonKernel_cpp(rho, wseq));
+    return rcpp_result_gen;
+END_RCPP
+}
+// phi_cpp
+Eigen::ArrayXd phi_cpp(Eigen::ArrayXd& wseq, Eigen::ArrayXd support, Eigen::ArrayXd weights);
+RcppExport SEXP _momentLS_phi_cpp(SEXP wseqSEXP, SEXP supportSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd >::type support(supportSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(phi_cpp(wseq, support, weights));
+    return rcpp_result_gen;
+END_RCPP
+}
+// makeXtX_w_cpp
+Eigen::MatrixXd makeXtX_w_cpp(Eigen::ArrayXd& alphaGrid, Eigen::ArrayXd& wseq, Eigen::ArrayXd& phi_wseq, bool diag);
+RcppExport SEXP _momentLS_makeXtX_w_cpp(SEXP alphaGridSEXP, SEXP wseqSEXP, SEXP phi_wseqSEXP, SEXP diagSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type alphaGrid(alphaGridSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type phi_wseq(phi_wseqSEXP);
+    Rcpp::traits::input_parameter< bool >::type diag(diagSEXP);
+    rcpp_result_gen = Rcpp::wrap(makeXtX_w_cpp(alphaGrid, wseq, phi_wseq, diag));
+    return rcpp_result_gen;
+END_RCPP
+}
+// computeXtr_w_cpp
+Eigen::ArrayXd computeXtr_w_cpp(Eigen::ArrayXd& alphaGrid, Eigen::ArrayXd& FT_r_wseq, Eigen::ArrayXd& wseq, Eigen::ArrayXd& phi_wseq);
+RcppExport SEXP _momentLS_computeXtr_w_cpp(SEXP alphaGridSEXP, SEXP FT_r_wseqSEXP, SEXP wseqSEXP, SEXP phi_wseqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type alphaGrid(alphaGridSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type FT_r_wseq(FT_r_wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type phi_wseq(phi_wseqSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeXtr_w_cpp(alphaGrid, FT_r_wseq, wseq, phi_wseq));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_momentLS_Xtr_cpp", (DL_FUNC) &_momentLS_Xtr_cpp, 4},
+    {"_momentLS_poissonKernel_cpp", (DL_FUNC) &_momentLS_poissonKernel_cpp, 2},
+    {"_momentLS_phi_cpp", (DL_FUNC) &_momentLS_phi_cpp, 3},
+    {"_momentLS_makeXtX_w_cpp", (DL_FUNC) &_momentLS_makeXtX_w_cpp, 4},
+    {"_momentLS_computeXtr_w_cpp", (DL_FUNC) &_momentLS_computeXtr_w_cpp, 4},
     {NULL, NULL, 0}
 };
 

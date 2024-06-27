@@ -6,3 +6,23 @@ Xtr_cpp <- function(x, a, standardization = TRUE, epsilon = 1e-10) {
     .Call('_momentLS_Xtr_cpp', PACKAGE = 'momentLS', x, a, standardization, epsilon)
 }
 
+#' @export
+poissonKernel_cpp <- function(rho, wseq) {
+    .Call('_momentLS_poissonKernel_cpp', PACKAGE = 'momentLS', rho, wseq)
+}
+
+#' @export
+phi_cpp <- function(wseq, support, weights) {
+    .Call('_momentLS_phi_cpp', PACKAGE = 'momentLS', wseq, support, weights)
+}
+
+#' @export
+makeXtX_w_cpp <- function(alphaGrid, wseq, phi_wseq, diag) {
+    .Call('_momentLS_makeXtX_w_cpp', PACKAGE = 'momentLS', alphaGrid, wseq, phi_wseq, diag)
+}
+
+#' @export
+computeXtr_w_cpp <- function(alphaGrid, FT_r_wseq, wseq, phi_wseq) {
+    .Call('_momentLS_computeXtr_w_cpp', PACKAGE = 'momentLS', alphaGrid, FT_r_wseq, wseq, phi_wseq)
+}
+

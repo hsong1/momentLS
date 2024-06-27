@@ -95,7 +95,7 @@ SR1 <-
     tol=tol*sqrt(norm2_r)
     
     ## support reduction algorithm ##
-    SR_out = supportReduction(XtX = XtX,Xtr = Xtr,s_alpha = s_alpha,init = init,gradTrace = gradTrace, tol = tol)
+    SR_out = supportReduction(XtX = XtX,Xtr = Xtr,s_alpha = s_alpha,init = init,gradTrace = gradTrace, tol = tol, maxit=maxit)
     
     #### output ####
     inds = SR_out$active_inds
