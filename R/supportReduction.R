@@ -1,7 +1,7 @@
-supportReduction = function(XtX,Xtr, s_alpha, init = NULL, gradTrace = FALSE, tol = 1e-6, maxit=1000){
+supportReduction = function(XtX,Xtr, s_alpha, beta, inds, gradTrace = FALSE, tol = 1e-6, maxit=1000){
   
   ## support reduction algorithm ##
-  ### Input: scaled XtX and Xtr, and scaling factor s_alpha
+  ### Input: scaled XtX and Xtr, scaling factor s_alpha, and initialization (beta,inds)
   
   if(gradTrace){
     gradientExt=list(gradMin=NULL,
@@ -10,17 +10,7 @@ supportReduction = function(XtX,Xtr, s_alpha, init = NULL, gradTrace = FALSE, to
                      gradMaxScaled=NULL)
     }else{gradientExt = NULL}
   
-  ### Step 1: initialization ###
-  if(is.null(init)){
-    #no support points and weights to start out with (length 0)
-    beta = numeric(0) #values of the weights corresponding to xTemp[inds]
-    inds = integer(0) #current active set
-  }else{
-    #init = list(weights, support)
-    if(any(init$weights<0)){stop("all weights need to be positive")}
-    inds = findIndices(support = init$support,alphaGrid = alphaGrid)
-    beta = init$weights/ s_alpha[inds]
-  }
+  
   
   #### Step2 - 4: Loop ####
   count = 0 #iteration count

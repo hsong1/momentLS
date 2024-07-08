@@ -12,9 +12,9 @@
 #' @param gridControl list which contains parameters to specify alphaGrid
 #' @param precomputed an optional list which can contain some precomputed quantities for computational speed-up
 #' @return a SR1fit object containing estimated support and weights
-#'@useDynLib momentLS
-#'@import Rcpp
-#'@export
+#' @useDynLib momentLS
+#' @import Rcpp
+#' @export
 SR1_w <-
   function(r, # input response vector
            delta = NULL,
@@ -31,8 +31,8 @@ SR1_w <-
            ),
            precomputed = list(
              s_alpha = NULL,
-             XtX = NULL,
-             Xtr = NULL,
+             XtX_w = NULL,
+             Xtr_w = NULL,
              alphaGrid = NULL,
              input = NULL)
   ) {
@@ -57,7 +57,7 @@ SR1_w <-
       m_uw = SR1(r,alphaGrid = alphaGrid); phi = m_uw; weightType="momentLS"
     }else{
       
-      if(class(phi)=="SRfit1"){m_uw=phi; weightType="momentLS"}else{
+      if(is(phi,"SRfit1")){m_uw=phi; weightType="momentLS"}else{
         # wseq and phi_wseq 
         if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
           stop("wseq and phi_wseq need to be provided")}
@@ -121,8 +121,20 @@ SR1_w <-
     norm2_r = 2*sum(r^2)-r[1]^2
     tol=tol*sqrt(norm2_r)
     
+    ## initialization ##
+    if(is.null(init)){
+      #no support points and weights to start out with (length 0)
+      inds = integer(0) #current active set
+      beta = numeric(0) #values of the weights corresponding to xTemp[inds]
+    }else{
+      #init = list(weights, support)
+      if(any(init$weights<0)){stop("all weights need to be positive")}
+      inds = findIndices(support = init$support,alphaGrid = alphaGrid)
+      beta = init$weights/ s_alpha[inds]
+    }
+    
     ## support reduction algorithm ##
-    SR_out = supportReduction(XtX = XtX_w,Xtr = Xtr_w,s_alpha = s_alpha,init = init,gradTrace = gradTrace, tol = tol)
+    SR_out = supportReduction(XtX = XtX_w,Xtr = Xtr_w,s_alpha = s_alpha,beta = beta, inds=inds, gradTrace = gradTrace, tol = tol)
     
     #### output ####
     inds = SR_out$active_inds

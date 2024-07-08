@@ -8,12 +8,15 @@ computeXtr_w = function(alphaGrid,
   
   # factorize 1/phi(w) from m_uw
   inv_fct = phi_inverse_pf(m_uw)
-  p1 = multiply_cp(inv_fct$phi_inv_cp,inv_fct$phi_inv_cp)
+  p1 = multiply(inv_fct$phi_inv_cp,inv_fct$phi_inv_cp)
   
-  # compute (two-sided) chebyshev coefficients of p(w)
-  p2 = c(r[1],r[-1]*2)
-  p = multiply_cp(p1,p2)
-  tilde_bk = c(p[1], p[-1]/2)
+  # compute (two-sided) chebyshev coefficients of p(w)=rhat(w)*p1(w)
+  FT_r = cosinePoly(coef = r,side = 2)
+  p = multiply(p1,FT_r)
+  tilde_bk = p$coef
+  # p2 = c(r[1],r[-1]*2)
+  # p = multiply_cp(p1,p2)
+  # tilde_bk = c(p[1], p[-1]/2)
   tilde_ck = compute_tilde_ck(tilde_bk)
   
   # compute Bi
@@ -26,7 +29,7 @@ computeXtr_w = function(alphaGrid,
     # out = C_phi^{-2}*(1/2pi) int_w K(a,w)p(w) dw
     out = C_phi_inv^2*int_Ka1p(a1 = alphaGrid,tilde_bk = tilde_bk)
   }else if(length(xi)==1){
-    # out = (1/2pi) int_w K(a,w)p(w){d_phi^2 K(xi_1,w)^2} dw
+    # out = C_phi^{-2}*(1/2pi) int_w K(a,w)p(w){d_phi^2 K(xi_1,w)^2} dw
     grid_mat = expand.grid(alphaGrid,xi)
     out = (C_phi_inv*pf_coef)^2*int_Ka1Ka2pow2p(a1 = grid_mat$Var1,a2 = grid_mat$Var2,tilde_bk = tilde_bk,tilde_ck = tilde_ck)
   }else{
@@ -108,12 +111,13 @@ makeXtX_w =function(alphaGrid, m_uw,
                                            N_wseq = 1e6)){
   # factorize 1/phi(w) from m_uw
   inv_fct = phi_inverse_pf(m_uw)
-  p2 = multiply_cp(inv_fct$phi_inv_cp,inv_fct$phi_inv_cp)
+  p1 = multiply(inv_fct$phi_inv_cp,inv_fct$phi_inv_cp)
+  p1 = p1$coef
 
-  if(length(p2)<5){
-    p2_pad = rep(0,5)
-    p2_pad[1:length(p2)] = p2
-    p2 = p2_pad; rm(p2_pad)
+  if(length(p1)<5){
+    p1_pad = rep(0,5)
+    p1_pad[1:length(p1)] = p1
+    p1 = p1_pad; rm(p1_pad)
   }
   # compute Aij
   xi = inv_fct$xi
@@ -154,7 +158,7 @@ makeXtX_w =function(alphaGrid, m_uw,
     }
   }
   # compute int_w p1(w)^2 h_i(w) dw
-  intVec=as.numeric((fourierCoefficients%*%p2))
+  intVec=as.numeric((fourierCoefficients%*%p1))
   
   # compute
   # H[i,j] = 1/(2pi*C_phi^2) int_w c_K(i,j) p1(w)^2 h_i(w) + c_K(j,i) p1(w)^2 h_j(w)
@@ -182,7 +186,7 @@ makeXtX_w =function(alphaGrid, m_uw,
     }
   }
   
-  intVec2=(fourierCoefficients2%*%p2)
+  intVec2=(fourierCoefficients2%*%p1)
   diag(H)=intVec2
   
   H=H*C_phi_inv^2

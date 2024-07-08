@@ -16,9 +16,9 @@
 #' 
 #'@export
 tune_delta = function(x, 
-                          nSplits = 1,
-                          c_M_const = 0,
-                          fcn.summarize = "mean"){
+                      nSplits = 1,
+                      c_M_const = 0,
+                      fcn.summarize = "mean"){
   
   r_j_all = compute_autocov_splits(x,nSplits)
   
@@ -91,13 +91,13 @@ find_mhat = function(r,c_M){
   return(mhat)
 }
 
-#' @export
-compute_delta_hat = function(M,mhat){
-  if(length(mhat)!=length(M)) {stop("length(mhat)!=length(M")}
-  deltas = foreach(i = 1:length(mhat),.combine="c")%do%{
-    if (mhat[i] > 0) {delta = 1 - exp(-0.5 * (log(M[i])/mhat[i]))}
-    else if (mhat[i] == 0) {delta = 1}
-    delta = max(delta, 1/M)
-  }
-  return(deltas)
-}
+#' #' @export
+#' compute_delta_hat = function(M,mhat){
+#'   if(length(mhat)!=length(M)) {stop("length(mhat)!=length(M")}
+#'   deltas = foreach(i = 1:length(mhat),.combine="c")%do%{
+#'     if (mhat[i] > 0) {delta = 1 - exp(-0.5 * (log(M[i])/mhat[i]))}
+#'     else if (mhat[i] == 0) {delta = 1}
+#'     delta = max(delta, 1/M)
+#'   }
+#'   return(deltas)
+#' }

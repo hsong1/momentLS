@@ -301,14 +301,14 @@ phi_inverse_pf=function(mu){
   if(n_phi==1){
     out = list(
       C_phi_inv = 1/fct$C_phi,
-      phi_inv_cp = cp_poly_from_beta(beta),
+      phi_inv_cp = cosinePoly_from_beta(beta),
       pf_coef = NULL,
       xi = xi
     )
   }else if(n_phi==2){
     out=list(
       C_phi_inv = 1/fct$C_phi,
-      phi_inv_cp = cp_poly_from_beta(beta),
+      phi_inv_cp = cosinePoly_from_beta(beta),
       pf_coef = 1/(1-xi^2),
       xi = xi
     )
@@ -344,7 +344,7 @@ phi_inverse_pf=function(mu){
     mat[nrow(mat),] = fcn_pf(0)
     
     C_phi_inv = 1/fct$C_phi
-    phi_inv_cp = cp_poly_from_beta(beta_r2)
+    phi_inv_cp = cosinePoly_from_beta(beta_r2)
     pf_coef = solve(mat,RHS)
     out=list(C_phi_inv = C_phi_inv, phi_inv_cp = phi_inv_cp, pf_coef=pf_coef, xi = xi)
   }
@@ -353,126 +353,50 @@ phi_inverse_pf=function(mu){
 
 
 
-#### fcns related to chebyshev polynomials ####
-# p(x) = sum_k a_k T_k(x) = sum_k a_k cos(kx)
-# e.g., p = c(a1,a2,a3) represents a1*T_0(x)+a2*T_1(x)+a3*T_2(x)
-
-multiply_cp<-function(p1,p2){
-  d1=length(p1)-1
-  d2=length(p2)-1
-  
-  d3=d1+d2
-  p3=rep(0,d3+1)
-  
-  
-  for (i in 1:(d1+1)){
-    i1=i-1
-    for (j in 1:(d2+1)){
-      j1=j-1
-      
-      p3[i1+j1+1]=p3[i1+j1+1]+0.5*p1[i]*p2[j]
-      p3[abs(i1-j1)+1]=p3[abs(i1-j1)+1]+0.5*p1[i]*p2[j]
-    }
-  }
-  return(p3)
-}
-
-
-cp_poly_from_beta = function(beta){
-  # return a_k s.t. 
-  # prod_{i=1}^n (1+beta_i^2 - 2*beta_i cos(w)) = \sum_{k=0}^{n} a_k cow(wk)
-  mat = cbind(1+beta^2, -2*beta)
-  p = mat[1,]
-  if(nrow(mat)>1){
-    for(i in 2:nrow(mat)){
-      p = multiply_cp(p,mat[i,])
-    }
-  }
-  
-  return(p)
-}
-
-
-eval_cp=function(w,p, two_sided = FALSE){
-  L = length(p)-1
-  # if two_sided = FALSE; sum_{k=0}^{L} p(k) cos(wk)
-  # if two_sided = TRUE; sum_{k=-L}^{L} p(k) cos(wk)
-  ret = numeric(length = length(w))
-  for(i in 1:length(ret)){
-    if(two_sided){
-      out = p*cos( w[i]*(0:L))
-      ret[i] = 2*sum(out)-p[1]
-    }else{
-      out = p*cos( w[i]*(0:L) )
-      ret[i] = sum(out)
-    }
-  }
-  
-  return(ret)
-}
-
-
-
-
-# 1/sapply(w,function(a) eval_fct(a,phi_fct(mu)))
+# #### fcns related to chebyshev polynomials ####
+# # p(x) = sum_k a_k T_k(x) = sum_k a_k cos(kx)
+# # e.g., p = c(a1,a2,a3) represents a1*T_0(x)+a2*T_1(x)+a3*T_2(x)
 # 
-# p1 = c(r[1],2*r[-1])
-# p2 = out$phi_inv_cp
-# xi = out$xi
-# p = multiply_cp(p1, multiply_cp(p2,p2))
-# a1 = 0.5
-# tilde_bk =c(p[1], p[-1]/2)
-# tilde_ck = compute_tilde_ck(tilde_bk)
-# 
-# #debugonce(int_Ka1Ka2pow2p)
-# wseq = seq(-pi,pi,length.out=100000)
-# p_wseq = eval_cp(wseq, p = p,two_sided = F)
-# #p_wseq2 = eval_cp(wseq,p = tilde_bk,two_sided = T)
-# #all.equal(p_wseq,p_wseq2)
-# 
-# aseq = c(0.1,0.2,0.3)
-# tilde_bk=c(1,0)
-# int_Ka1p(a1 = aseq,tilde_bk = tilde_bk,approx = T)
-# sapply(aseq, function(a) sum( poissonKernel(rho = a,w = wseq))/length(wseq))
+# multiply_cp<-function(p1,p2){
+#   d1=length(p1)-1
+#   d2=length(p2)-1
+#   
+#   d3=d1+d2
+#   p3=rep(0,d3+1)
+#   
+#   
+#   for (i in 1:(d1+1)){
+#     i1=i-1
+#     for (j in 1:(d2+1)){
+#       j1=j-1
+#       
+#       p3[i1+j1+1]=p3[i1+j1+1]+0.5*p1[i]*p2[j]
+#       p3[abs(i1-j1)+1]=p3[abs(i1-j1)+1]+0.5*p1[i]*p2[j]
+#     }
+#   }
+#   return(p3)
+# }
 # 
 # 
 # 
 # 
-# rhat_wseq = eval_cp(wseq,r,two_sided = T)
-# p2 = eval_cp(w = wseq,p = multiply_cp(out$phi_inv_cp,out$phi_inv_cp),two_sided = F)
-# p = rhat_wseq *p2
-# 
-# sapply(aseq, function(a) sum(poissonKernel(rho = a,w = wseq)*p_wseq))/length(wseq)
-# 
-# 
-# int_Ka1Ka2pow2p(a1 = a1,a2 = xi[1],tilde_bk = tilde_bk, tilde_ck = tilde_ck)
-# 
-# 
-# 
-# 
-# w= c(1.3,2.4)
-# M = length(r)
-# beta = fct$beta[c(1,length(fct$beta))]
-# 
-# p1 = c(r[1],2*r[-1])
-# eval_cp(w,p1)
-# eval_cp(w,r,two_sided = T)
-# sapply(w, function(a) 2*sum(r*cos(a*(0:(length(r)-1))))-r[1])
-# 
-# p2 = cp_poly_from_beta(beta)
-# eval_cp(w, p2)
-# sapply(w, function(a) prod((1+beta^2-2*beta*cos(a))))
-# 
-# eval_cp(w, multiply_cp(p2,p2))
-# sapply(w, function(a) prod((1+beta^2-2*beta*cos(a))^2))
-# 
-# 
-# p_12 = multiply_cp(p1, multiply_cp(p2,p2))
-# eval_cp(w,p_12)
-# 
-# tilde_bk = c(p_12[1],p_12[-1]/2)
-# eval_cp(w,tilde_bk,two_sided = T)
+# eval_cp=function(w,p, two_sided = FALSE){
+#   L = length(p)-1
+#   # if two_sided = FALSE; sum_{k=0}^{L} p(k) cos(wk)
+#   # if two_sided = TRUE; sum_{k=-L}^{L} p(k) cos(wk)
+#   ret = numeric(length = length(w))
+#   for(i in 1:length(ret)){
+#     if(two_sided){
+#       out = p*cos( w[i]*(0:L))
+#       ret[i] = 2*sum(out)-p[1]
+#     }else{
+#       out = p*cos( w[i]*(0:L) )
+#       ret[i] = sum(out)
+#     }
+#   }
+#   
+#   return(ret)
+# }
 # 
 # 
 # 
-

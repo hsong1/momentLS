@@ -94,8 +94,21 @@ SR1 <-
     norm2_r = 2*sum(r^2)-r[1]^2
     tol=tol*sqrt(norm2_r)
     
+    ## initialization ##
+    if(is.null(init)){
+      #no support points and weights to start out with (length 0)
+      inds = integer(0) #current active set
+      beta = numeric(0) #values of the weights corresponding to scaled alphaGrid[inds]
+      
+    }else{
+      #init = list(weights, support)
+      if(any(init$weights<0)){stop("all weights need to be positive")}
+      inds = findIndices(support = init$support,alphaGrid = alphaGrid)
+      beta = init$weights/ s_alpha[inds]
+    }
+    
     ## support reduction algorithm ##
-    SR_out = supportReduction(XtX = XtX,Xtr = Xtr,s_alpha = s_alpha,init = init,gradTrace = gradTrace, tol = tol, maxit=maxit)
+    SR_out = supportReduction(XtX = XtX,Xtr = Xtr,s_alpha = s_alpha,beta = beta, inds=inds, gradTrace = gradTrace, tol = tol, maxit=maxit)
     
     #### output ####
     inds = SR_out$active_inds

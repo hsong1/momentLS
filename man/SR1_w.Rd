@@ -15,8 +15,8 @@ SR1_w(
   gradTrace = FALSE,
   n_alphas = 501,
   gridControl = list(cm = FALSE, scale = "log"),
-  precomputed = list(s_alpha = NULL, XtX = NULL, Xtr = NULL, alphaGrid = NULL, input =
-    NULL)
+  precomputed = list(s_alpha = NULL, XtX_w = NULL, Xtr_w = NULL, alphaGrid = NULL, input
+    = NULL)
 )
 }
 \arguments{
