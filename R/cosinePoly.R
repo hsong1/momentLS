@@ -71,7 +71,7 @@ multiply<-function(x1,x2){
   M1=length(p1)
   M2=length(p2)
   
-  M=2*(M1+M2-1)-1
+  M=nextn(2*(M1+M2-1)-1)
   p1aug=c(p1,rep(0,M-M1))
   p2aug=c(p2,rep(0,M-M2))
   
