@@ -21,7 +21,7 @@ SR1_w <-
            alphaGrid = NULL,
            phi = NULL,
            init = NULL,
-           tol = 10^-8, # alg. tolerance
+           tol = 10^-6, # alg. tolerance
            maxit = 1000,
            gradTrace = FALSE,
            n_alphas = 501,

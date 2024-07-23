@@ -23,7 +23,7 @@ SR1 <-
            tol = 10^-8, # alg. tolerance
            maxit = 1000,
            gradTrace = FALSE,
-           n_alphas = 1001,
+           n_alphas = 501,
            gridControl = list(
              cm = FALSE, # completely monotone?
              scale = "log"
