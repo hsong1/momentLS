@@ -80,7 +80,7 @@ int_Ka1Ka2p <- function(a1,a2,tilde_bk,tilde_ck=NULL,approx=TRUE, TOL = .Machine
   
   # when a1!=0  & a2==0
   ind_2 = which(!is_a1_0 & is_a2_0)
-  if(length(ind_1)>0){
+  if(length(ind_2)>0){
     val[ind_2] = int_Ka1p(a1 = a1[ind_2],tilde_bk = tilde_bk,approx=approx)
   }
   
@@ -110,8 +110,8 @@ int_Ka1Ka2p <- function(a1,a2,tilde_bk,tilde_ck=NULL,approx=TRUE, TOL = .Machine
 
 g_int_Ka1Ka2p = function(a1,a2,tilde_bk,tilde_ck, approx= TRUE, TOL=.Machine$double.eps^{1/3}){
   
-  if(min(abs(a1),abs(a2)) < TOL){stop("both a1 and a2 !=0")}
-  if(any(abs(a1-a2) < TOL)) stop("a1!=a2")
+  #if(min(abs(a1),abs(a2)) < TOL){stop("both a1 and a2 need to be non-zero")}
+  if(any(abs(a1-a2) < TOL)) stop("a1 needs to be different from a2")
   
   # evaluate d/da2 int K(a1,w)K(a2,w) p(w)dw
   wei=matrix(nrow = length(a1),ncol = 3)
@@ -132,7 +132,7 @@ g_int_Ka1Ka2p = function(a1,a2,tilde_bk,tilde_ck, approx= TRUE, TOL=.Machine$dou
 
 int_Ka1Ka2pow2p = function(a1,a2,tilde_bk,tilde_ck,approx=TRUE,TOL = .Machine$double.eps^{1/3}){
   # evaluate (1/2pi) int K(a1,w)K(a2,w)^2 p(w)dw
-  if(any(abs(a2)< TOL)) stop("a2 has to be always non-zero")
+  #if(any(abs(a2)< TOL)) stop("a2 has to be always non-zero")
   
   
   val = vector(mode = "numeric", length = length(a1))

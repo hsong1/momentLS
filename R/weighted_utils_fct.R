@@ -208,7 +208,7 @@ find_roots_fcn = function(ai,bi,a0,q_fcn,
 
 
 q_alpha = function(ai){
-  if(any(abs(ai)<.Machine$double.eps^{1/2})){stop("a!=0 in q_alpha(a)")}
+  #if(any(abs(ai)<.Machine$double.eps^{1/2})){stop("a!=0 in q_alpha(a)")}
   val = (1+ai^2)/(2*ai)
   return(val)
 } 
