@@ -10,7 +10,7 @@ SR1_w(
   alphaGrid = NULL,
   phi = NULL,
   init = NULL,
-  tol = 10^-8,
+  tol = 10^-6,
   maxit = 1000,
   gradTrace = FALSE,
   n_alphas = 501,

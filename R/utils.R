@@ -85,6 +85,13 @@ asympVariance<-function(weights,support){
   return(avar)
 }
 
+#' Compute asymptotic variance of a moment sequence
+#' @param SRfit momentLS fit object
+#' @export
+avar = function(SRfit1){
+  return(asympVariance(weights = SRfit1$weights, support = SRfit1$support))
+}
+
 
 
 findIndices = function(support, alphaGrid){
