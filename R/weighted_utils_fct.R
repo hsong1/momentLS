@@ -172,8 +172,8 @@ find_roots_fcn = function(ai,bi,a0,q_fcn,
   }
   
   endpoints = interval_endpoints[idx,,drop=F]
-  endpoints[,1] = endpoints[,1]*exp(sign(endpoints[,1])*10^-8) #endpoints[,1]+1e-10
-  endpoints[,2] = endpoints[,2]*exp(-sign(endpoints[,2])*10^-8) #endpoints[,2]-1e-10
+  endpoints[,1] = endpoints[,1]*exp(sign(endpoints[,1])*.Machine$double.eps^{2/3}) #endpoints[,1]+1e-10
+  endpoints[,2] = endpoints[,2]*exp(-sign(endpoints[,2])*.Machine$double.eps^{2/3}) #endpoints[,2]-1e-10
   qfcn_vals = 
     cbind(q_fcn(endpoints[,1]),
           q_fcn(endpoints[,2]))
