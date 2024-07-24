@@ -85,16 +85,26 @@ for(i in 1:length(mu_list)){
 }
 
 
-
-fit_w=SR1_w(r,delta = 0.1,n_alphas = 101)
+fit_w=SR1_w(r,delta = 0.1,n_alphas = 101,comp_method = "exact")
 N = 1e5
 phi=list(wseq = 2*pi*(0:(N-1))/N,
-         phi_wseq = phi_cpp(wseq = 2*pi*(0:(N-1))/N,support = fit_w$phi$support,weights = fit_w$phi$weights))
-#fit_w2=SR1_w(r = r,delta = 0.1,phi = phi,n_alphas = 101)
+         phi_wseq = phi_cpp(wseq = 2*pi*(0:(N-1))/N,
+                            support = fit_w$phi$support,
+                            weights = fit_w$phi$weights))
+
+fit_w2=SR1_w(r = r,delta = 0.1,phi = phi, n_alphas = 101)
 #save(fit_w2, file = paste0("tests/testthat/testdata/fit_w2.Rdata"))
-load(testthat::test_path("testdata","fit_w2.Rdata"))
+#load(testthat::test_path("testdata","fit_w2.Rdata"))
 
 eval1=fit_w
 eval2=fit_w2
+testthat::expect_equal(eval1$weights,eval2$weights,tolerance = 1e-6)
+testthat::expect_equal(eval1$support,eval2$support,tolerance = 1e-6)
+
+fit_w3= SR1_w(r = r,delta = 0.1,comp_method = "num",
+              n_alphas = 101,phi =fit_w$phi,n_phi = 1e5)
+
+eval1=fit_w2
+eval2=fit_w3
 testthat::expect_equal(eval1$weights,eval2$weights,tolerance = 1e-6)
 testthat::expect_equal(eval1$support,eval2$support,tolerance = 1e-6)

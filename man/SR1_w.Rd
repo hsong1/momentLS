@@ -9,6 +9,8 @@ SR1_w(
   delta = NULL,
   alphaGrid = NULL,
   phi = NULL,
+  n_phi = length(r),
+  comp_method = c("exact", "num"),
   init = NULL,
   tol = 10^-6,
   maxit = 1000,

@@ -20,6 +20,8 @@ SR1_w <-
            delta = NULL,
            alphaGrid = NULL,
            phi = NULL,
+           n_phi = length(r),
+           comp_method = c("exact","num"),
            init = NULL,
            tol = 10^-6, # alg. tolerance
            maxit = 1000,
@@ -54,67 +56,90 @@ SR1_w <-
     
     ## weight phi ##
     if(is.null(phi)){
-      m_uw = SR1(r,alphaGrid = alphaGrid); phi = m_uw; weightType="momentLS"
+      m_uw = SR1(r,alphaGrid = alphaGrid); weightType="momentLS"
+      phi = m_uw
+    }
+    
+    ## set up weightType ##
+    comp_method = match.arg(comp_method,choices = c("exact","num"))
+    
+    if(is(phi,"SRfit1")&comp_method=="exact"){
+      m_uw=phi; weightType="momentLS"
+    }else if(is(phi,"SRfit1")&comp_method=="num"){
+      wseq = (0:(n_phi-1))*2*pi/n_phi
+      phi_wseq = phi_cpp(wseq,support = phi$support,weights = phi$weights)
+      weightType = "others"
     }else{
-      
-      if(is(phi,"SRfit1")){m_uw=phi; weightType="momentLS"}else{
-        # wseq and phi_wseq 
-        if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
-          stop("wseq and phi_wseq need to be provided")}
-        stopifnot(length(phi$wseq)==length(phi$phi_wseq))
-        stopifnot(length(phi$wseq)>=length(r))
-        weightType="others"
+      # wseq and phi_wseq 
+      if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
+        stop("wseq and phi_wseq need to be provided")}
+      stopifnot(length(phi$wseq)==length(phi$phi_wseq))
+      stopifnot(length(phi$wseq)>=length(r))
+      phi_wseq = phi$phi_wseq
+      wseq = phi$wseq
+      weightType="others"
       }
       
-    }
+    
     
     
     ## XtX ##
-
-    if(weightType=="momentLS"){
-      if(is.null(precomputed$XtX_w)){
+    if(!is.null(precomputed$XtX_w)){
+      # checks
+      if(is.null(precomputed$alphaGrid)){stop("when XtX_w is not NULL, the precomputed list should contain alphaGrid")}else{
+        stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)}
+      if(is.null(precomputed$s_alpha)){
+        stop("s_alpha needs to be provided")}
+      
+      XtX_w = precomputed$XtX_w
+      s_alpha = precomputed$s_alpha
+      
+    }else{
+      # when no precomputed XtX_w
+      if(weightType=="momentLS"){
         XtX_w = makeXtX_w(alphaGrid = alphaGrid, m_uw = m_uw)
         s_alpha = sqrt(diag(XtX_w))
         XtX_w = XtX_w/ outer(s_alpha,s_alpha)
       }else{
-        if(is.null(precomputed$alphaGrid)){
-          stop("when XtX_w is not NULL, the precomputed list should contain alphaGrid")}else{
-            stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)}
-        if(is.null(precomputed$s_alpha)){
-          stop("s_alpha needs to be provided")
-        }
-        XtX_w = precomputed$XtX_w
+        message("numerical integration for XtX_w")
+        XtX_w = makeXtX_w_cpp(alphaGrid = alphaGrid,wseq = wseq,phi_wseq = phi_wseq,diag = TRUE)
+        s_alpha = sqrt(diag(XtX_w))
+        XtX_w = XtX_w/ outer(s_alpha,s_alpha)
       }
-      
-      
+    }
+    
+    
+     
       ## Xtr ##
       # Xtr[i] = <x_alpha[i], r>_phi / s_alpha[i]
-      if(is.null(precomputed$Xtr_w)){
+    
+    if(!is.null(precomputed$Xtr_w)){
+      # check that Xtr was computed using the correct alphaGrid and input r
+      if(is.null(precomputed$input)){
+        stop("When Xtr_w is not NULL, the precomputed list should contain input autocovariance estimate")}else{
+          stopifnot( abs(precomputed$input-r) <1e-4)}
+      if(is.null(precomputed$alphaGrid)){
+        stop("When Xtr_w is not NULL, the precomputed list should contain alphaGrid")}else{
+          stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)
+        }
+      stopifnot(length(precomputed$Xtr_w)==length(alphaGrid))
+      
+      Xtr_w = precomputed$Xtr_w
+    }else{
+      # when no precomputed Xtr_w
+      if(weightType=="momentLS"){
         Xtr_w = computeXtr_w(alphaGrid = alphaGrid,r = r,m_uw = m_uw)
         Xtr_w = Xtr_w / s_alpha
-      }else{
-        # check that Xtr was computed using the correct alphaGrid and input r
-        if(is.null(precomputed$input)){
-          stop("When Xtr_w is not NULL, the precomputed list should contain input autocovariance estimate")}else{
-            stopifnot( abs(precomputed$input-r) <1e-4)
-          }
-        if(is.null(precomputed$alphaGrid)){
-          stop("When Xtr_w is not NULL, the precomputed list should contain alphaGrid")}else{
-            stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)
-          }
-        stopifnot(length(precomputed$Xtr_w)==length(alphaGrid))
-        Xtr_w = precomputed$Xtr_w
-      }
-    }else{
-      raug = c(r, rep(0, length(phi$wseq)-length(r)))
-      FT_r_wseq = Re(2*fft(raug)) - r[1]
-      message("numerical integration for XtX_w and Xtr_w")
-      Xtr_w = computeXtr_w_cpp(alphaGrid = alphaGrid,FT_r_wseq = FT_r_wseq,wseq = phi$wseq,phi_wseq = phi$phi_wseq)
-      XtX_w = makeXtX_w_cpp(alphaGrid = alphaGrid,wseq = phi$wseq,phi_wseq = phi$phi_wseq,diag = TRUE)
-      s_alpha = sqrt(diag(XtX_w))
-      XtX_w = XtX_w/ outer(s_alpha,s_alpha)
-      Xtr_w = Xtr_w / s_alpha
-    }    
+        }else{
+          message("numerical integration for Xtr_w")
+          raug = c(r, rep(0, length(wseq)-length(r)))
+          FT_r_wseq = Re(2*fft(raug)) - r[1]
+          Xtr_w = computeXtr_w_cpp(alphaGrid = alphaGrid,FT_r_wseq = FT_r_wseq,
+                                   wseq = wseq,phi_wseq = phi_wseq)
+          Xtr_w = Xtr_w / s_alpha
+        }
+    }
+    
     
     
     ##### relative tolerance:
