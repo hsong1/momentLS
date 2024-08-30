@@ -352,6 +352,10 @@ phi_inverse_pf=function(mu){
 }
 
 
+eval_invfct = function(w,phiInvfct){
+  frac_xi = t(sapply(w,function(w1) poissonKernel(phiInvfct$xi,w1)))
+  phiInvfct$C_phi_inv*eval(w, phiInvfct$phi_inv_cp)*frac_xi%*%phiInvfct$pf_coef
+}
 
 # #### fcns related to chebyshev polynomials ####
 # # p(x) = sum_k a_k T_k(x) = sum_k a_k cos(kx)
