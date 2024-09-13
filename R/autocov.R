@@ -12,12 +12,13 @@ autocov<-function(x,center=TRUE){
   if (is.null(dim(x))){
     # vector
     if (center){xbar=x-mean(x)}else{xbar = x}
-    n=length(xbar) # length of x
-    xbar2=c(xbar,rep(0,n)) # zero-pad
+    n=as.numeric(length(xbar)) # length of x
+    N=as.numeric(nextn(2*n-1))
+    xbar2=c(xbar,rep(0,N-n)) # zero-pad
     t1=fft(xbar2)
     norms=Re(t1)^2+Im(t1)^2
     unadj=Re(fft(norms,inverse=TRUE)[1:n])
-    adj=unadj/(2*n^2)
+    adj=unadj/(N*n)
     return(adj)
   }else{
     if(length(dim(x))!=2){stop("length(dim(x)) should be 2")}
@@ -25,7 +26,8 @@ autocov<-function(x,center=TRUE){
     n=nrow(x)
     
     if (center){xbar=t(t(x)-apply(x,2,mean))}else{xbar = x}
-    xbar2=rbind(xbar,matrix(0,n,p))
+    N=as.numeric(nextn(2*n-1))
+    xbar2=rbind(xbar,matrix(0,N-n,p))
     t1=mvfft(xbar2)
     t1conj=Conj(t1)
     
@@ -36,10 +38,10 @@ autocov<-function(x,center=TRUE){
     for (i in 1:p){
       for (j in i:p){
         f_ij=t1conj[,i]*t1[,j]
-        r[,i,j]=Re(fft(f_ij,inverse=TRUE)[1:n])/(2*n^2)
+        r[,i,j]=Re(fft(f_ij,inverse=TRUE)[1:n])/(n*N)
         
         if (i!=j){
-          r[,j,i]=Re(fft(f_ij,inverse=FALSE)[1:n])/(2*n^2)
+          r[,j,i]=Re(fft(f_ij,inverse=FALSE)[1:n])/(n*N)
         }
       }
     }

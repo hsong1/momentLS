@@ -45,8 +45,8 @@ eval=function(w,x){
   
   return(ret)
 }
-x1=cosinePoly(side = 2)
-x=cosinePoly(side=1)
+#x1=cosinePoly(side = 2)
+#x=cosinePoly(side=1)
 
 convert_twosides <-function(x){
   a = x$coef
