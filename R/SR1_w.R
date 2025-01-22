@@ -75,6 +75,7 @@ SR1_w <-
         stop("wseq and phi_wseq need to be provided")}
       stopifnot(length(phi$wseq)==length(phi$phi_wseq))
       stopifnot(length(phi$wseq)>=length(r))
+      message("numerical integrations are based on provided wseq")
       phi_wseq = phi$phi_wseq
       wseq = phi$wseq
       weightType="others"
