@@ -28,6 +28,7 @@ SR1 <-
              cm = FALSE, # completely monotone?
              scale = "log"
            ),
+           Xtr_approx = TRUE,
            precomputed = list(
              s_alpha = NULL,
              XtX = NULL,
@@ -74,7 +75,10 @@ SR1 <-
     ## Xtr ##
     # Xtr[i] = <x_alpha[i], r> / s_alpha[i]
     if(is.null(precomputed$Xtr)){
-      Xtr = Xtr_cpp(x=alphaGrid, a=r)
+      if(Xtr_approx){Xtr = Xtr_cpp(x=alphaGrid, a=r)}else{
+        Xtr = computeXtr(x = alphaGrid,r = r,s_x = s_alpha)
+      }
+      
     }else{
       # check that Xtr was computed using the correct alphaGrid and input r
       if(is.null(precomputed$input)){

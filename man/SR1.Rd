@@ -14,6 +14,7 @@ SR1(
   gradTrace = FALSE,
   n_alphas = 501,
   gridControl = list(cm = FALSE, scale = "log"),
+  Xtr_approx = TRUE,
   precomputed = list(s_alpha = NULL, XtX = NULL, Xtr = NULL, alphaGrid = NULL, input =
     NULL)
 )
