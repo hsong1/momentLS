@@ -18,7 +18,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of momentLS is to implement Moment LS estimators in "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
+Implementation of Moment LS estimators in 
+- "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
+- "Multivariate moment least-squares estimators for reversible Markov chains" <https://arxiv.org/abs/2310.06330>
+- "Weighted shape-constrained estimation for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2408.03024>
 
 ## Installation
 
@@ -134,3 +137,72 @@ aVar_sqdiffs %>%
   summarise(Average_MSE=mean(value),SE=sd(value)/sqrt(B)) %>%
   knitr::kable(digits=3)
 ```
+
+
+
+
+### Example of Multivariate momentLS estimator
+
+We illustrate a simple usage example demonstrating how to compute the multivariate momentLS estimator introduced in <https://arxiv.org/abs/2310.06330>.
+
+```{r multivariate}
+# simulate d=10 chains
+set.seed(1);  
+d=10 # generate g(X_t) where g:X->R^d
+chainParams = list(type="MH",  M = 10000,  nStates = 100, 
+                   g = matrix(rnorm(100*d),ncol=d), discreteMC = simulate_discreteMC(nStates = 100), d = d)
+ch_mh = generateChain(chainParams)
+x = ch_mh$x 
+dim(x) # g(X_t) is a matrix with 10000 rows and d columns
+
+# compute the multivariate MomentLS asymptotic variance estimator
+avarMLSE  = mtvMLSE(x = x)
+knitr::kable(avarMLSE$cov,digits=2) # estimated asymptotic covariance matrix (d by d)
+
+
+# compare with BM, OLBM, init-seq estimators
+result=c(
+mtvMLSE = sum((avarMLSE$cov-ch_mh$varTruth)^2),
+mtvBM = sum((mcmcse::mcse.multi(x,method="bm" ,r = 1)$cov-ch_mh$varTruth)^2),
+mtvOBM = sum((mcmcse::mcse.multi(x,method="obm",r = 1)$cov-ch_mh$varTruth)^2),
+mtvInit = sum((mcmcse::mcse.initseq(x)$cov-ch_mh$varTruth)^2)  
+)
+
+result
+
+```
+
+
+```{r mtv repeated}
+results = foreach(b=1:B,.combine="rbind")%do%{
+  set.seed(b+12345)
+  d=10 # generate g(X_t) where g:X->R^d
+  chainParams = list(type="MH",  M = 10000,  nStates = 100, 
+                   g = matrix(rnorm(100*d),ncol=d), discreteMC = simulate_discreteMC(nStates = 100), d = d)
+  ch_mh = generateChain(chainParams)
+  x = ch_mh$x 
+
+  # compute the multivariate MomentLS asymptotic variance estimator
+  avarMLSE  = mtvMLSE(x = x)
+
+
+  # compare with BM, OLBM, init-seq estimators
+  result=c(
+    mtvMLSE = sum((avarMLSE$cov-ch_mh$varTruth)^2),
+    mtvBM = sum((mcmcse::mcse.multi(x,method="bm" ,r = 1)$cov-ch_mh$varTruth)^2),
+    mtvOBM = sum((mcmcse::mcse.multi(x,method="obm",r = 1)$cov-ch_mh$varTruth)^2),
+    mtvInit = sum((mcmcse::mcse.initseq(x)$cov-ch_mh$varTruth)^2)  
+  )
+  
+  
+  return(result)
+}
+
+results %>% data.frame() %>% 
+  gather() %>%
+  rename(Estimator=key) %>%
+  group_by(Estimator) %>%
+  summarise(Average_MSE=mean(value),SE=sd(value)/sqrt(B)) %>%
+  knitr::kable(digits=3)
+```
+
