@@ -19,9 +19,10 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 Implementation of Moment LS estimators in 
-- "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
-- "Multivariate moment least-squares estimators for reversible Markov chains" <https://arxiv.org/abs/2310.06330>
-- "Weighted shape-constrained estimation for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2408.03024>
+
+  - "Efficient shape-constrained inference for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2207.12705>
+  - "Multivariate moment least-squares estimators for reversible Markov chains" <https://arxiv.org/abs/2310.06330>
+  - "Weighted shape-constrained estimation for the autocovariance sequence from a reversible Markov chain" <https://arxiv.org/abs/2408.03024>
 
 ## Installation
 
