@@ -65,16 +65,19 @@ SR1_w <-
     
     if(is(phi,"SRfit1")&comp_method=="exact"){
       m_uw=phi; weightType="momentLS"
+      
     }else if(is(phi,"SRfit1")&comp_method=="num"){
       wseq = (0:(n_phi-1))*2*pi/n_phi
       phi_wseq = phi_cpp(wseq,support = phi$support,weights = phi$weights)
       weightType = "others"
+      
     }else{
       # wseq and phi_wseq 
       if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
         stop("wseq and phi_wseq need to be provided")}
       stopifnot(length(phi$wseq)==length(phi$phi_wseq))
       stopifnot(length(phi$wseq)>=length(r))
+      
       message("numerical integrations are based on provided wseq")
       phi_wseq = phi$phi_wseq
       wseq = phi$wseq
@@ -82,39 +85,15 @@ SR1_w <-
       }
       
     
-    
-    
-    ## XtX ##
-    if(!is.null(precomputed$XtX_w)){
-      # checks
+    ## when precomputed XtX_w and Xtr_w are given ##
+    if(!is.null(precomputed$XtX_w) & !is.null(precomputed$Xtr_w)){
+      
+      # checks for XtX_w
       if(is.null(precomputed$alphaGrid)){stop("when XtX_w is not NULL, the precomputed list should contain alphaGrid")}else{
         stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)}
       if(is.null(precomputed$s_alpha)){
         stop("s_alpha needs to be provided")}
       
-      XtX_w = precomputed$XtX_w
-      s_alpha = precomputed$s_alpha
-      
-    }else{
-      # when no precomputed XtX_w
-      if(weightType=="momentLS"){
-        XtX_w = makeXtX_w(alphaGrid = alphaGrid, m_uw = m_uw)
-        s_alpha = sqrt(diag(XtX_w))
-        XtX_w = XtX_w/ outer(s_alpha,s_alpha)
-      }else{
-        message("numerical integration for XtX_w")
-        XtX_w = makeXtX_w_cpp(alphaGrid = alphaGrid,wseq = wseq,phi_wseq = phi_wseq,diag = TRUE)
-        s_alpha = sqrt(diag(XtX_w))
-        XtX_w = XtX_w/ outer(s_alpha,s_alpha)
-      }
-    }
-    
-    
-     
-      ## Xtr ##
-      # Xtr[i] = <x_alpha[i], r>_phi / s_alpha[i]
-    
-    if(!is.null(precomputed$Xtr_w)){
       # check that Xtr was computed using the correct alphaGrid and input r
       if(is.null(precomputed$input)){
         stop("When Xtr_w is not NULL, the precomputed list should contain input autocovariance estimate")}else{
@@ -125,23 +104,31 @@ SR1_w <-
         }
       stopifnot(length(precomputed$Xtr_w)==length(alphaGrid))
       
+      # assign precomputed values
+      XtX_w = precomputed$XtX_w
+      s_alpha = precomputed$s_alpha
       Xtr_w = precomputed$Xtr_w
-    }else{
-      # when no precomputed Xtr_w
-      if(weightType=="momentLS"){
+      
+    }else if(weightType=="momentLS"){
+        XtX_w = makeXtX_w(alphaGrid = alphaGrid, m_uw = m_uw)
+        s_alpha = sqrt(diag(XtX_w))
         Xtr_w = computeXtr_w(alphaGrid = alphaGrid,r = r,m_uw = m_uw)
-        Xtr_w = Xtr_w / s_alpha
-        }else{
-          message("numerical integration for Xtr_w")
-          raug = c(r, rep(0, length(wseq)-length(r)))
-          FT_r_wseq = Re(2*fft(raug)) - r[1]
-          Xtr_w = computeXtr_w_cpp(alphaGrid = alphaGrid,FT_r_wseq = FT_r_wseq,
-                                   wseq = wseq,phi_wseq = phi_wseq)
-          Xtr_w = Xtr_w / s_alpha
-        }
+        
+    }else{
+        message("numerical integration for XtX_w and Xtr_w")
+        raug = c(r, rep(0, length(wseq)-length(r)))
+        FT_r_wseq = Re(2*fft(raug)) - r[1]
+        
+        out = compute_XtXw_Xtrw_cpp(alphaGrid = alphaGrid,FT_r_wseq = FT_r_wseq,wseq = wseq,phi_wseq = phi_wseq)
+        XtX_w = out$XtX_w
+        s_alpha = sqrt(diag(XtX_w))
+        Xtr_w = out$Xtr_w
     }
     
-    
+
+    # scale XtX_w, Xtr_w
+    XtX_w = XtX_w/ outer(s_alpha,s_alpha)
+    Xtr_w = Xtr_w / s_alpha
     
     ##### relative tolerance:
     norm2_r = 2*sum(r^2)-r[1]^2
