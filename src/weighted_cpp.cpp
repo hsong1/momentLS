@@ -61,8 +61,59 @@ Rcpp::List compute_XtXw_Xtrw_cpp(
   );
 }
 
+//' @export
+ // [[Rcpp::export]]
+ Eigen::MatrixXd makeXtX_w_cpp(
+     Eigen::ArrayXd & alphaGrid,
+     Eigen::ArrayXd & wseq,
+     Eigen::ArrayXd & phi_wseq){
+   
+   int n = wseq.size();
+   int s = alphaGrid.size();
+   
+   Eigen::MatrixXd Xw(n,s);
+   Eigen::ArrayXd invPhi = phi_wseq.inverse(); // 1/phi
+   
+   // X[,i] = K(wseq, alpha_i) / phi(wseq)
+   for(int i = 0; i < s; i++){
+     Xw.col(i) = (poissonKernel_cpp(alphaGrid[i], wseq) * invPhi).matrix();
+   }
+   
+   // XtX_w = (1/n) * Xw'Xw
+   Eigen::MatrixXd XtX_w = (Xw.transpose() * Xw) / n;
+   
+   return(XtX_w);
+ }
+
+// [[Rcpp::export]]
+Eigen::ArrayXd computeXtr_w_cpp(Eigen::ArrayXd & alphaGrid,
+                                Eigen::ArrayXd & FT_r_wseq,
+                                Eigen::ArrayXd & wseq,
+                                Eigen::ArrayXd & phi_wseq){
+
+
+  int n = wseq.size();
+  int s = alphaGrid.size();
+  
+  Eigen::MatrixXd Xw(n,s);
+  Eigen::ArrayXd invPhi = phi_wseq.inverse(); // 1/phi
+  
+  // X[,i] = K(wseq, alpha_i) / phi(wseq)
+  for(int i = 0; i < s; i++){
+    Xw.col(i) = (poissonKernel_cpp(alphaGrid[i], wseq) * invPhi).matrix();
+  }
+  
+  // Xtr_w = (1/n) * Xw' yw  where yw = FT_r / phi(wseq)
+  Eigen::VectorXd yw = (FT_r_wseq * invPhi).matrix();
+  Eigen::VectorXd Xtr_w = (Xw.transpose() * yw) / n;
+
+  return(Xtr_w);
+
+}
+
+
 // // [[Rcpp::export]]
-// Eigen::MatrixXd makeXtX_w_cpp(Eigen::ArrayXd & alphaGrid, Eigen::ArrayXd & wseq, Eigen::ArrayXd & phi_wseq, bool diag){
+// Eigen::MatrixXd makeXtX_w_cpp2(Eigen::ArrayXd & alphaGrid, Eigen::ArrayXd & wseq, Eigen::ArrayXd & phi_wseq, bool diag){
 // 
 // 
 //   Eigen::ArrayXd wei;
@@ -91,7 +142,7 @@ Rcpp::List compute_XtXw_Xtrw_cpp(
 
 
 // // [[Rcpp::export]]
-// Eigen::ArrayXd computeXtr_w_cpp(Eigen::ArrayXd & alphaGrid, 
+// Eigen::ArrayXd computeXtr_w_cpp2(Eigen::ArrayXd & alphaGrid, 
 //                                 Eigen::ArrayXd & FT_r_wseq,
 //                                 Eigen::ArrayXd & wseq, 
 //                                 Eigen::ArrayXd & phi_wseq){
@@ -158,12 +209,12 @@ v = sapply(alphaGrid, function(alpha1) sum(poissonKernel(w = wseq,rho = alpha1)*
 max(abs(v))
 
 # # compare with previous functions
-# max(abs(out$XtX_w - makeXtX_w_cpp(alphaGrid,wseq,phi_wseq,diag=T)))
-# max(abs(out$Xtr_w - computeXtr_w_cpp(alphaGrid,Frm_wseq,wseq,phi_wseq)))
+# max(abs(out$XtX_w - makeXtX_w_cpp2(alphaGrid,wseq,phi_wseq,diag=T)))
+# max(abs(out$Xtr_w - computeXtr_w_cp2p(alphaGrid,Frm_wseq,wseq,phi_wseq)))
 # 
 # test = function(alphaGrid,Frm_wseq,wseq,phi_wseq){
-#   XtX_w= makeXtX_w_cpp(alphaGrid,wseq,phi_wseq,diag=T)
-#   Xtr_w= computeXtr_w_cpp(alphaGrid,Frm_wseq,wseq,phi_wseq)
+#   XtX_w= makeXtX_w_cpp2(alphaGrid,wseq,phi_wseq,diag=T)
+#   Xtr_w= computeXtr_w_cpp2(alphaGrid,Frm_wseq,wseq,phi_wseq)
 #   return(list(XtX_w,Xtr_w))
 # }
 # 

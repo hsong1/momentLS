@@ -205,7 +205,7 @@ makeXtX_w =function(alphaGrid, m_uw,
     phi_wseq = phi_cpp(wseq = wseq, support = m_uw$support,weights = m_uw$weights)
     out_chck = vector("numeric",length = nrow(ind_chck))
     for(i in 1:nrow(ind_chck)){
-      out_chck[i] = makeXtX_w_cpp(alphaGrid = c(alphaGrid[ind_chck[i,1]],alphaGrid[ind_chck[i,2]]), wseq = wseq, phi_wseq = phi_wseq,diag = F)[2,1]
+      out_chck[i] = makeXtX_w_cpp(alphaGrid = c(alphaGrid[ind_chck[i,1]],alphaGrid[ind_chck[i,2]]), wseq = wseq, phi_wseq = phi_wseq)[2,1]
     }
     
    ind_rplc= which(abs(H[ind_chck] - out_chck) > rplc_TOL)

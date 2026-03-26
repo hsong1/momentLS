@@ -64,12 +64,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// makeXtX_w_cpp
+Eigen::MatrixXd makeXtX_w_cpp(Eigen::ArrayXd& alphaGrid, Eigen::ArrayXd& wseq, Eigen::ArrayXd& phi_wseq);
+RcppExport SEXP _momentLS_makeXtX_w_cpp(SEXP alphaGridSEXP, SEXP wseqSEXP, SEXP phi_wseqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type alphaGrid(alphaGridSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type phi_wseq(phi_wseqSEXP);
+    rcpp_result_gen = Rcpp::wrap(makeXtX_w_cpp(alphaGrid, wseq, phi_wseq));
+    return rcpp_result_gen;
+END_RCPP
+}
+// computeXtr_w_cpp
+Eigen::ArrayXd computeXtr_w_cpp(Eigen::ArrayXd& alphaGrid, Eigen::ArrayXd& FT_r_wseq, Eigen::ArrayXd& wseq, Eigen::ArrayXd& phi_wseq);
+RcppExport SEXP _momentLS_computeXtr_w_cpp(SEXP alphaGridSEXP, SEXP FT_r_wseqSEXP, SEXP wseqSEXP, SEXP phi_wseqSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type alphaGrid(alphaGridSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type FT_r_wseq(FT_r_wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type wseq(wseqSEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd& >::type phi_wseq(phi_wseqSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeXtr_w_cpp(alphaGrid, FT_r_wseq, wseq, phi_wseq));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_momentLS_Xtr_cpp", (DL_FUNC) &_momentLS_Xtr_cpp, 4},
     {"_momentLS_poissonKernel_cpp", (DL_FUNC) &_momentLS_poissonKernel_cpp, 2},
     {"_momentLS_phi_cpp", (DL_FUNC) &_momentLS_phi_cpp, 3},
     {"_momentLS_compute_XtXw_Xtrw_cpp", (DL_FUNC) &_momentLS_compute_XtXw_Xtrw_cpp, 4},
+    {"_momentLS_makeXtX_w_cpp", (DL_FUNC) &_momentLS_makeXtX_w_cpp, 3},
+    {"_momentLS_computeXtr_w_cpp", (DL_FUNC) &_momentLS_computeXtr_w_cpp, 4},
     {NULL, NULL, 0}
 };
 

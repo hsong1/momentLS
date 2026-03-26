@@ -21,3 +21,12 @@ compute_XtXw_Xtrw_cpp <- function(alphaGrid, FT_r_wseq, wseq, phi_wseq) {
     .Call('_momentLS_compute_XtXw_Xtrw_cpp', PACKAGE = 'momentLS', alphaGrid, FT_r_wseq, wseq, phi_wseq)
 }
 
+#' @export
+makeXtX_w_cpp <- function(alphaGrid, wseq, phi_wseq) {
+    .Call('_momentLS_makeXtX_w_cpp', PACKAGE = 'momentLS', alphaGrid, wseq, phi_wseq)
+}
+
+computeXtr_w_cpp <- function(alphaGrid, FT_r_wseq, wseq, phi_wseq) {
+    .Call('_momentLS_computeXtr_w_cpp', PACKAGE = 'momentLS', alphaGrid, FT_r_wseq, wseq, phi_wseq)
+}
+

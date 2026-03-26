@@ -92,7 +92,7 @@ phi=list(wseq = 2*pi*(0:(N-1))/N,
                             support = fit_w$phi$support,
                             weights = fit_w$phi$weights))
 
-fit_w2=SR1_w(r = r,delta = 0.1,phi = phi, n_alphas = 101)
+fit_w2=SR1_w(r = r,delta = 0.1,phi = phi, n_alphas = 101, comp_method = "num")
 #save(fit_w2, file = paste0("tests/testthat/testdata/fit_w2.Rdata"))
 #load(testthat::test_path("testdata","fit_w2.Rdata"))
 
