@@ -30,7 +30,6 @@ SR1 <-
            ),
            Xtr_approx = TRUE,
            precomputed = list(
-             s_alpha = NULL,
              XtX = NULL,
              Xtr = NULL,
              alphaGrid = NULL,
@@ -56,13 +55,11 @@ SR1 <-
     ## each column of X is [..., alpha^1, 1, alpha^1, alpha^2, alpha^3,...] / s_alpha
     ## where s_alpha = sqrt( sum_k alpha^{2|k|} ) = sqrt((1+alpha^2)/(1-alpha^2))
     
-    if(is.null(precomputed$s_alpha)){
-      s_alpha  = sqrt((1+alphaGrid^2)/(1-alphaGrid^2))
-      }else{s_alpha = precomputed$s_alpha}
-    
     if(is.null(precomputed$XtX)){
-      XtX=makeXtX(alphaGrid, s_x = s_alpha, scale=F)
+      # when precomputed$XtX is not provided
+      XtX=makeXtX(alphaGrid, s_x = NULL, scale=F)
     }else{
+      # when XtX is provided
       # check that XtX was computed using the correct alphaGrid
       if(is.null(precomputed$alphaGrid)){
         stop("when XtX is not NULL, the precomputed list should contain alphaGrid")}else{
@@ -80,8 +77,9 @@ SR1 <-
     ## Xtr ##
     # Xtr[i] = <x_alpha[i], r> / s_alpha[i]
     if(is.null(precomputed$Xtr)){
+      # when precomputed$Xtr is not provided
       if(Xtr_approx){Xtr = Xtr_cpp(x=alphaGrid, a=r, standardization =F)}else{
-        Xtr = computeXtr(x = alphaGrid,r = r,s_x = s_alpha, scale=F)
+        Xtr = computeXtr(x = alphaGrid,r = r,s_x = NULL, scale=F)
       }
       
     }else{
@@ -99,6 +97,7 @@ SR1 <-
     }
     
     # scale XtX, Xtr
+    s_alpha = sqrt(diag(XtX))
     XtX = XtX / outer(s_alpha, s_alpha)
     Xtr = Xtr / s_alpha
     

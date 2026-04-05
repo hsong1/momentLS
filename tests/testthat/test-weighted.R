@@ -131,7 +131,6 @@ fitar1_1_w = SR1_w(r,alphaGrid = alphaGrid,phi = fitar1_1,comp_method = "num")
 
 dmat = compute_XtXw_Xtrw_cpp(alphaGrid = alphaGrid,FT_r_wseq = Re(2*fft(r)) - r[1], wseq = wseq,phi_wseq = phiWeight)
 dmat$alphaGrid = alphaGrid
-dmat$s_alpha = sqrt(diag(dmat$XtX_w))
 dmat$input = r
 dmat$phi = fitar1_1
 fitar1_2_w = SR1_w(r = r,alphaGrid = alphaGrid,comp_method = "num",precomputed = dmat)

@@ -32,9 +32,9 @@ SR1_w <-
              scale = "log"
            ),
            precomputed = list(
-             s_alpha = NULL,
              XtX_w = NULL,
              Xtr_w = NULL,
+             phi = NULL,
              alphaGrid = NULL,
              input = NULL)
   ) {
@@ -63,8 +63,6 @@ SR1_w <-
       # checks for XtX_w
       if(is.null(precomputed$alphaGrid)){stop("when XtX_w is not NULL, the precomputed list should contain alphaGrid")}else{
         stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)}
-      if(is.null(precomputed$s_alpha)){
-        stop("s_alpha needs to be provided")}
       
       # check that Xtr was computed using the correct alphaGrid and input r
       if(is.null(precomputed$input)){
@@ -79,12 +77,11 @@ SR1_w <-
       
       # assign precomputed values
       XtX_w = precomputed$XtX_w
-      s_alpha = precomputed$s_alpha
       Xtr_w = precomputed$Xtr_w
       phi = precomputed$phi
       
     }else{
-      
+      ## when precomputed XtX_w and Xtr_w are not given ##
       ## set up phi/weightType #
       
       ## weight phi ##
@@ -120,7 +117,6 @@ SR1_w <-
     # compute XtX_w and Xtr_w  
     if(weightType=="momentLS"){
         XtX_w = makeXtX_w(alphaGrid = alphaGrid, m_uw = m_uw)
-        s_alpha = sqrt(diag(XtX_w))
         Xtr_w = computeXtr_w(alphaGrid = alphaGrid,r = r,m_uw = m_uw)
         
     }else{
@@ -130,13 +126,13 @@ SR1_w <-
         
         out = compute_XtXw_Xtrw_cpp(alphaGrid = alphaGrid,FT_r_wseq = FT_r_wseq,wseq = wseq,phi_wseq = phi_wseq)
         XtX_w = out$XtX_w
-        s_alpha = sqrt(diag(XtX_w))
         Xtr_w = out$Xtr_w
     }
     }
     
 
     # scale XtX_w, Xtr_w
+    s_alpha = sqrt(diag(XtX_w))
     XtX_w = XtX_w/ outer(s_alpha,s_alpha)
     Xtr_w = Xtr_w / s_alpha
     
