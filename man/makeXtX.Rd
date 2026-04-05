@@ -4,7 +4,7 @@
 \alias{makeXtX}
 \title{compute XtX}
 \usage{
-makeXtX(x, s_x = NULL)
+makeXtX(x, s_x = NULL, scale = T)
 }
 \description{
 compute XtX

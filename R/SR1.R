@@ -10,7 +10,7 @@
 #' @param maxit maximum number of iterations for support reduction algorithm
 #' @param gradTrace trace gradients if TRUE
 #' @param gridControl list which contains parameters to specify alphaGrid
-#' @param precomputed an optional list which can contain some precomputed quantities for computational speed-up
+#' @param precomputed an optional list which can contain some precomputed quantities (unscaled) for computational speed-up
 #' @return a SR1fit object containing estimated support and weights
 #'@useDynLib momentLS
 #'@import Rcpp
@@ -61,13 +61,18 @@ SR1 <-
       }else{s_alpha = precomputed$s_alpha}
     
     if(is.null(precomputed$XtX)){
-      XtX=makeXtX(alphaGrid, s_x = s_alpha)
+      XtX=makeXtX(alphaGrid, s_x = s_alpha, scale=F)
     }else{
       # check that XtX was computed using the correct alphaGrid
       if(is.null(precomputed$alphaGrid)){
         stop("when XtX is not NULL, the precomputed list should contain alphaGrid")}else{
         stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)
+        }
+      
+      if(all(abs(diag(precomputed$XtX) - 1) < 1e-10)){
+        warning("precomputed XtX appears already scaled (diagonal is all 1); expected unscaled")
       }
+      
       XtX = precomputed$XtX
       
     }
@@ -75,8 +80,8 @@ SR1 <-
     ## Xtr ##
     # Xtr[i] = <x_alpha[i], r> / s_alpha[i]
     if(is.null(precomputed$Xtr)){
-      if(Xtr_approx){Xtr = Xtr_cpp(x=alphaGrid, a=r)}else{
-        Xtr = computeXtr(x = alphaGrid,r = r,s_x = s_alpha)
+      if(Xtr_approx){Xtr = Xtr_cpp(x=alphaGrid, a=r, standardization =F)}else{
+        Xtr = computeXtr(x = alphaGrid,r = r,s_x = s_alpha, scale=F)
       }
       
     }else{
@@ -93,6 +98,9 @@ SR1 <-
       Xtr = precomputed$Xtr
     }
     
+    # scale XtX, Xtr
+    XtX = XtX / outer(s_alpha, s_alpha)
+    Xtr = Xtr / s_alpha
     
     ##### relative tolerance:
     norm2_r = 2*sum(r^2)-r[1]^2

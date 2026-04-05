@@ -38,7 +38,7 @@ SR1_w(
 
 \item{gridControl}{list which contains parameters to specify alphaGrid}
 
-\item{precomputed}{an optional list which can contain some precomputed quantities for computational speed-up}
+\item{precomputed}{an optional list which can contain some precomputed quantities (unscaled) for computational speed-up}
 }
 \value{
 a SR1fit object containing estimated support and weights

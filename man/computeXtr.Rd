@@ -4,7 +4,7 @@
 \alias{computeXtr}
 \title{compute Xtr}
 \usage{
-computeXtr(x, r, s_x = NULL)
+computeXtr(x, r, s_x = NULL, scale = T)
 }
 \description{
 compute Xtr

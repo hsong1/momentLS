@@ -1,18 +1,20 @@
 #' compute XtX
 #'@export
 makeXtX <-
-function(x, s_x = NULL){
+function(x, s_x = NULL, scale=T){
   XtX = outer(x,x)
   XtX = (1+XtX)/(1-XtX)
-  if(is.null(s_x)){
-    s_x = sqrt((1+x^2)/(1-x^2))
-  }
-  XtX = XtX / outer(s_x, s_x)
+  
+  if(scale){
+    if(is.null(s_x)){s_x = sqrt((1+x^2)/(1-x^2))}
+    XtX = XtX / outer(s_x, s_x)}
+  
+  return(XtX)
 }
  
 #' compute Xtr
 #'@export
-computeXtr = function(x, r, s_x = NULL){
+computeXtr = function(x, r, s_x = NULL, scale=T){
   Xtr=rep(0,length(x))
   n = length(r)
   exponents=seq(0,n-1,by=1)
@@ -21,10 +23,10 @@ computeXtr = function(x, r, s_x = NULL){
     Xtr[i]=2*sum((x[i]^exponents)*r)-r[1]
   }
   
-  if(is.null(s_x)){
-    s_x = sqrt((1+x^2)/(1-x^2))
-  }
-  Xtr = Xtr / s_x
+  if(scale){
+    if(is.null(s_x)){s_x = sqrt((1+x^2)/(1-x^2))}
+    Xtr = Xtr / s_x}
+  
   return(Xtr)
 }
 

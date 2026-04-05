@@ -10,7 +10,7 @@
 #' @param maxit maximum number of iterations for support reduction algorithm
 #' @param gradTrace trace gradients if TRUE
 #' @param gridControl list which contains parameters to specify alphaGrid
-#' @param precomputed an optional list which can contain some precomputed quantities for computational speed-up
+#' @param precomputed an optional list which can contain some precomputed quantities (unscaled) for computational speed-up
 #' @return a SR1fit object containing estimated support and weights
 #' @useDynLib momentLS
 #' @import Rcpp
@@ -98,11 +98,12 @@ SR1_w <-
       if(is.null(precomputed$input)){
         stop("When Xtr_w is not NULL, the precomputed list should contain input autocovariance estimate")}else{
           stopifnot( abs(precomputed$input-r) <1e-4)}
-      if(is.null(precomputed$alphaGrid)){
-        stop("When Xtr_w is not NULL, the precomputed list should contain alphaGrid")}else{
-          stopifnot( abs(precomputed$alphaGrid-alphaGrid) <1e-4)
-        }
+ 
       stopifnot(length(precomputed$Xtr_w)==length(alphaGrid))
+      
+      if(all(abs(diag(precomputed$XtX_w) - 1) < 1e-10)){
+        warning("precomputed XtX_w appears already scaled (diagonal is all 1); expected unscaled")
+      }
       
       # assign precomputed values
       XtX_w = precomputed$XtX_w

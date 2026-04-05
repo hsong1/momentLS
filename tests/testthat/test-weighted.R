@@ -108,3 +108,32 @@ eval1=fit_w2
 eval2=fit_w3
 testthat::expect_equal(eval1$weights,eval2$weights,tolerance = 1e-6)
 testthat::expect_equal(eval1$support,eval2$support,tolerance = 1e-6)
+
+
+
+### check whether precomputed options work well
+alphaGrid=makeGrid(upper_threshold = 0.95,nX = 101,scale = "equidist",cm = F)
+ch_ar1 = generateAR1Chain(M = 10000,rho = 0.9)
+XtX = makeXtX(x = alphaGrid, s_x = NULL, scale = F)
+r = autocov(ch_ar1$x)
+Xtr = Xtr_cpp(x = alphaGrid,a = r,standardization = F)
+testthat::expect_equal(computeXtr(x = alphaGrid,r = r,scale = F),Xtr)
+
+fitar1_1 = SR1(r = r,alphaGrid = alphaGrid)
+fitar1_2 = SR1(r = r,alphaGrid = alphaGrid,precomputed = list(XtX=XtX,Xtr=Xtr,alphaGrid=alphaGrid,input=r))
+
+testthat::expect_equal(fitar1_1,fitar1_2)
+M=length(r)
+wseq=2*pi*(0:(M-1))/M
+phiWeight = phi_cpp(wseq = wseq,support = fitar1_1$support,weights = fitar1_1$weights)
+
+fitar1_1_w = SR1_w(r,alphaGrid = alphaGrid,phi = fitar1_1,comp_method = "num")
+
+dmat = compute_XtXw_Xtrw_cpp(alphaGrid = alphaGrid,FT_r_wseq = Re(2*fft(r)) - r[1], wseq = wseq,phi_wseq = phiWeight)
+dmat$alphaGrid = alphaGrid
+dmat$s_alpha = sqrt(diag(dmat$XtX_w))
+dmat$input = r
+
+fitar1_2_w = SR1_w(r = r,alphaGrid = alphaGrid,comp_method = "num",precomputed = dmat)
+
+testthat::expect_equal(fitar1_1_w, fitar1_2_w)
