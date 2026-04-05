@@ -137,3 +137,17 @@ dmat$input = r
 fitar1_2_w = SR1_w(r = r,alphaGrid = alphaGrid,comp_method = "num",precomputed = dmat)
 
 testthat::expect_equal(fitar1_1_w, fitar1_2_w)
+
+
+### unweighted vs weighted with phi =1
+
+fitar1_3_uw = SR1(r = r,alphaGrid = alphaGrid)
+M0 = length(r)*2 # it seems that the resolution needs to be at least twice of M
+wseq0=2*pi*(0:(M0-1))/M0
+fitar1_3_w1 = SR1_w(r,alphaGrid = alphaGrid, phi=list(wseq=wseq0, phi_wseq = rep(1,M0)),comp_method="num")
+
+testthat::expect_equal(fitar1_3_uw$weights,fitar1_3_w1$weights)
+testthat::expect_equal(fitar1_3_uw$support,fitar1_3_w1$support)
+
+testthat::expect_equal(fitar1_3_uw$SRinputList$XtX, fitar1_3_w1$SRinputList$XtX_w)
+testthat::expect_equal(fitar1_3_uw$SRinputList$Xtr, fitar1_3_w1$SRinputList$Xtr_w)
