@@ -133,7 +133,7 @@ dmat = compute_XtXw_Xtrw_cpp(alphaGrid = alphaGrid,FT_r_wseq = Re(2*fft(r)) - r[
 dmat$alphaGrid = alphaGrid
 dmat$s_alpha = sqrt(diag(dmat$XtX_w))
 dmat$input = r
-
+dmat$phi = fitar1_1
 fitar1_2_w = SR1_w(r = r,alphaGrid = alphaGrid,comp_method = "num",precomputed = dmat)
 
 testthat::expect_equal(fitar1_1_w, fitar1_2_w)

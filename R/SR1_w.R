@@ -54,35 +54,7 @@ SR1_w <-
       alphaGrid = makeGrid(nX = n_alphas, upper_threshold = 1-delta, cm = gridControl$cm, scale = gridControl$scale)
     }
     
-    ## weight phi ##
-    if(is.null(phi)){
-      m_uw = SR1(r,alphaGrid = alphaGrid); weightType="momentLS"
-      phi = m_uw
-    }
     
-    ## set up weightType ##
-    comp_method = match.arg(comp_method,choices = c("exact","num"))
-    
-    if(is(phi,"SRfit1")&comp_method=="exact"){
-      m_uw=phi; weightType="momentLS"
-      
-    }else if(is(phi,"SRfit1")&comp_method=="num"){
-      wseq = (0:(n_phi-1))*2*pi/n_phi
-      phi_wseq = phi_cpp(wseq,support = phi$support,weights = phi$weights)
-      weightType = "others"
-      
-    }else{
-      # wseq and phi_wseq 
-      if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
-        stop("wseq and phi_wseq need to be provided")}
-      stopifnot(length(phi$wseq)==length(phi$phi_wseq))
-      stopifnot(length(phi$wseq)>=length(r))
-      
-      message("numerical integrations are based on provided wseq")
-      phi_wseq = phi$phi_wseq
-      wseq = phi$wseq
-      weightType="others"
-      }
       
     
     ## when precomputed XtX_w and Xtr_w are given ##
@@ -109,8 +81,44 @@ SR1_w <-
       XtX_w = precomputed$XtX_w
       s_alpha = precomputed$s_alpha
       Xtr_w = precomputed$Xtr_w
+      phi = precomputed$phi
       
-    }else if(weightType=="momentLS"){
+    }else{
+      
+      ## set up phi/weightType #
+      
+      ## weight phi ##
+      if(is.null(phi)){
+        m_uw = SR1(r,alphaGrid = alphaGrid); weightType="momentLS"
+        phi = m_uw
+      }
+      
+      ## set up weightType ##
+      comp_method = match.arg(comp_method,choices = c("exact","num"))
+      
+      if(is(phi,"SRfit1")&comp_method=="exact"){
+        m_uw=phi; weightType="momentLS"
+        
+      }else if(is(phi,"SRfit1")&comp_method=="num"){
+        wseq = (0:(n_phi-1))*2*pi/n_phi
+        phi_wseq = phi_cpp(wseq,support = phi$support,weights = phi$weights)
+        weightType = "others"
+        
+      }else{
+        # wseq and phi_wseq 
+        if(is.null(phi$wseq) || is.null(phi$phi_wseq)){
+          stop("wseq and phi_wseq need to be provided")}
+        stopifnot(length(phi$wseq)==length(phi$phi_wseq))
+        stopifnot(length(phi$wseq)>=length(r))
+        
+        message("numerical integrations are based on provided wseq")
+        phi_wseq = phi$phi_wseq
+        wseq = phi$wseq
+        weightType="others"
+      }
+      
+    # compute XtX_w and Xtr_w  
+    if(weightType=="momentLS"){
         XtX_w = makeXtX_w(alphaGrid = alphaGrid, m_uw = m_uw)
         s_alpha = sqrt(diag(XtX_w))
         Xtr_w = computeXtr_w(alphaGrid = alphaGrid,r = r,m_uw = m_uw)
@@ -124,6 +132,7 @@ SR1_w <-
         XtX_w = out$XtX_w
         s_alpha = sqrt(diag(XtX_w))
         Xtr_w = out$Xtr_w
+    }
     }
     
 
